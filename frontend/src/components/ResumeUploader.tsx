@@ -80,11 +80,7 @@ export default function ResumeUploader() {
     }
 
     try {
-      const response = await axios.post("http://127.0.0.1:8001/screen-resume", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post("http://127.0.0.1:8003/screen-resume", formData);
       setResult(response.data);
     } catch (err) {
       setError("Failed to screen resume. Please check if the backend is running.");

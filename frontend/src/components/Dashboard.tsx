@@ -59,8 +59,8 @@ export default function Dashboard() {
     const fetchData = async () => {
       try {
         const [statsResponse, resultsResponse] = await Promise.all([
-          fetch("http://127.0.0.1:8001/dashboard-stats"),
-          fetch("http://127.0.0.1:8001/screening-results")
+          fetch("http://127.0.0.1:8003/dashboard-stats"),
+          fetch("http://127.0.0.1:8003/screening-results")
         ]);
 
         const statsData = await statsResponse.json();
@@ -111,10 +111,10 @@ export default function Dashboard() {
   if (!stats) return null;
 
   const skillChartData = {
-    labels: stats.topSkills.map(item => item.skill),
+    labels: stats.topSkills?.map(item => item.skill) || [],
     datasets: [{
       label: 'Count',
-      data: stats.topSkills.map(item => item.count),
+      data: stats.topSkills?.map(item => item.count) || [],
       backgroundColor: [
         'rgba(59, 130, 246, 0.8)',
         'rgba(147, 51, 234, 0.8)',
@@ -134,9 +134,9 @@ export default function Dashboard() {
   };
 
   const roleChartData = {
-    labels: stats.roleDistribution.map(item => item.role),
+    labels: stats.roleDistribution?.map(item => item.role) || [],
     datasets: [{
-      data: stats.roleDistribution.map(item => item.count),
+      data: stats.roleDistribution?.map(item => item.count) || [],
       backgroundColor: [
         'rgba(59, 130, 246, 0.8)',
         'rgba(147, 51, 234, 0.8)',
@@ -149,10 +149,10 @@ export default function Dashboard() {
   };
 
   const activityChartData = {
-    labels: stats.weeklyActivity.map(item => item.week),
+    labels: stats.weeklyActivity?.map(item => item.week) || [],
     datasets: [{
       label: 'Resumes Processed',
-      data: stats.weeklyActivity.map(item => item.count),
+      data: stats.weeklyActivity?.map(item => item.count) || [],
       borderColor: 'rgb(59, 130, 246)',
       backgroundColor: 'rgba(59, 130, 246, 0.1)',
       tension: 0.4,
@@ -160,10 +160,10 @@ export default function Dashboard() {
   };
 
   const scoreChartData = {
-    labels: stats.scoreDistribution.map(item => item.range),
+    labels: stats.scoreDistribution?.map(item => item.range) || [],
     datasets: [{
       label: 'Count',
-      data: stats.scoreDistribution.map(item => item.count),
+      data: stats.scoreDistribution?.map(item => item.count) || [],
       backgroundColor: 'rgba(16, 185, 129, 0.8)',
       borderColor: 'rgb(16, 185, 129)',
       borderWidth: 1,
@@ -210,8 +210,8 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Top Skill</p>
-              <p className="text-xl font-bold text-gray-900">{stats.topSkills[0]?.skill}</p>
-              <p className="text-sm text-gray-600">{stats.topSkills[0]?.count} candidates</p>
+              <p className="text-xl font-bold text-gray-900">{stats.topSkills?.[0]?.skill || 'No data'}</p>
+              <p className="text-sm text-gray-600">{stats.topSkills?.[0]?.count || 0} candidates</p>
             </div>
             <div className="bg-purple-100 p-3 rounded-full">
               <CheckCircle className="h-6 w-6 text-purple-600" />
@@ -224,7 +224,7 @@ export default function Dashboard() {
             <div>
               <p className="text-sm font-medium text-gray-600">This Week</p>
               <p className="text-3xl font-bold text-gray-900">
-                {stats.weeklyActivity[stats.weeklyActivity.length - 1]?.count}
+                {stats.weeklyActivity?.[stats.weeklyActivity.length - 1]?.count || 0}
               </p>
             </div>
             <div className="bg-orange-100 p-3 rounded-full">
@@ -306,7 +306,7 @@ export default function Dashboard() {
       <div className="bg-white rounded-xl shadow-lg p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h3>
         <div className="space-y-4">
-          {screeningResults.slice(-4).reverse().map((item: ScreeningResult, index: number) => (
+          {screeningResults?.slice(-4).reverse().map((item: ScreeningResult, index: number) => (
             <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center space-x-4">
                 <div className="bg-blue-100 p-2 rounded-full">
@@ -329,7 +329,7 @@ export default function Dashboard() {
               </div>
             </div>
           ))}
-          {screeningResults.length === 0 && (
+          {(!screeningResults || screeningResults.length === 0) && (
             <p className="text-gray-500 text-center py-8">No recent activity. Start screening resumes to see results here.</p>
           )}
         </div>
