@@ -14,6 +14,7 @@ import tempfile
 import json
 import hashlib
 from datetime import datetime
+import requests
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'ml'))
 from job_predictor import JobPredictor
 
@@ -35,6 +36,10 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 # Load job predictor model
 job_predictor = JobPredictor()
 job_predictor.load_model('../ml/job_predictor_model.pkl')
+
+# NVIDIA API configuration
+NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
+NVIDIA_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions"
 
 # Data storage (in-memory for demo, should use database in production)
 candidates_db = []
@@ -210,6 +215,92 @@ def bias_detection(text: str) -> Dict:
         "bias_level": "high" if bias_score > 0.05 else "low"
     }
 
+def generate_resume_summary(text: str) -> str:
+    """Generate AI-powered resume summary using NVIDIA API"""
+    if not NVIDIA_API_KEY:
+        return f"Professional with {len(text.split())} words of experience. Skills include technical expertise and professional qualifications."
+
+    try:
+        prompt = f"""Please provide a concise, professional summary of this resume in 2-3 sentences, highlighting the candidate's key skills, experience, and qualifications:
+
+{text[:2000]}  # Limit text to avoid token limits
+
+Summary:"""
+
+        payload = {
+            "model": "meta/llama-3.1-8b-instruct",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.7,
+            "max_tokens": 300,
+            "stream": False
+        }
+
+        headers = {
+            "Authorization": f"Bearer {NVIDIA_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(NVIDIA_API_URL, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        result = response.json()
+        return result["choices"][0]["message"]["content"].strip()
+
+    except Exception as e:
+        print(f"NVIDIA API error: {e}")
+        # Fallback to basic summary
+        return f"Professional with {len(text.split())} words of experience. Skills include technical expertise and professional qualifications."
+
+def generate_fit_analysis(resume_data: Dict, job_description: str, fit_score: float) -> str:
+    """Generate detailed fit analysis using NVIDIA API"""
+    if not NVIDIA_API_KEY:
+        return f"This candidate shows a {fit_score}% fit score. Key strengths include their technical skills and experience. Consider their overall qualifications for the role requirements."
+
+    try:
+        prompt = f"""Analyze this candidate's fit for the job based on the following information:
+
+Candidate Profile:
+- Name: {resume_data['name']}
+- Skills: {', '.join(resume_data['skills'])}
+- Experience: {resume_data['experience_years']} years
+- Education: {resume_data['education']}
+
+Job Description:
+{job_description[:1000]}
+
+Current Fit Score: {fit_score}%
+
+Please provide a detailed analysis (3-4 sentences) explaining:
+1. Key strengths that make this candidate a good fit
+2. Any potential concerns or gaps
+3. Recommendations for the hiring team
+
+Analysis:"""
+
+        payload = {
+            "model": "meta/llama-3.1-8b-instruct",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.6,
+            "max_tokens": 500,
+            "stream": False
+        }
+
+        headers = {
+            "Authorization": f"Bearer {NVIDIA_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(NVIDIA_API_URL, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        result = response.json()
+        return result["choices"][0]["message"]["content"].strip()
+
+    except Exception as e:
+        print(f"NVIDIA API error: {e}")
+        # Fallback analysis
+        return f"This candidate shows a {fit_score}% fit score. Key strengths include their technical skills and experience. Consider their overall qualifications for the role requirements."
+
 def calculate_fit_score(resume_data: Dict, job_description: str) -> float:
     """Calculate fit score using keyword matching and semantic similarity"""
     resume_text = resume_data["raw_text"]
@@ -273,6 +364,10 @@ async def screen_resume(file: UploadFile = File(...), job_description: str = For
         adjusted_fit = base_fit * (1 - skill_gap["gap_score"] * 0.2) * (ats_check["ats_score"] / 100 * 0.1 + 0.9)
         fit_score = float(min(adjusted_fit, 100))
 
+        # Generate AI-powered summary and analysis
+        resume_summary = generate_resume_summary(text)
+        fit_analysis = generate_fit_analysis(resume_data, job_description, fit_score)
+
         # Store screening result
         screening_result = {
             "id": str(len(screening_results_db) + 1),
@@ -283,7 +378,9 @@ async def screen_resume(file: UploadFile = File(...), job_description: str = For
             "skills": resume_data["skills"],
             "experience_years": resume_data["experience_years"],
             "timestamp": datetime.now().isoformat(),
-            "recommendation": "Strong match" if fit_score > 70 else "Moderate match" if fit_score > 50 else "Weak match"
+            "recommendation": "Strong match" if fit_score > 70 else "Moderate match" if fit_score > 50 else "Weak match",
+            "ai_summary": resume_summary,
+            "ai_analysis": fit_analysis
         }
         screening_results_db.append(screening_result)
 
@@ -312,7 +409,9 @@ async def screen_resume(file: UploadFile = File(...), job_description: str = For
             "language_tone": tone_eval,
             "bias_detection": bias_check,
             "fit_score": round(fit_score, 2),
-            "recommendation": "Strong match" if fit_score > 70 else "Moderate match" if fit_score > 50 else "Weak match"
+            "recommendation": "Strong match" if fit_score > 70 else "Moderate match" if fit_score > 50 else "Weak match",
+            "ai_summary": resume_summary,
+            "ai_analysis": fit_analysis
         }
 
     finally:
@@ -367,6 +466,65 @@ def get_privacy_policy():
         "user_rights": "Users have right to access, rectify, and delete their data",
         "contact": "For privacy concerns, contact data@ai-resume-screener.com"
     }
+
+@app.post("/chat-assistant")
+async def chat_assistant(message: str = Form(...), context: Optional[str] = Form(None)):
+    """AI-powered chatbot assistant for HR queries using NVIDIA API"""
+    if not NVIDIA_API_KEY:
+        return {
+            "response": "AI assistant is currently unavailable. Please check your NVIDIA API key configuration.",
+            "timestamp": datetime.now().isoformat(),
+            "error": "API key not configured"
+        }
+
+    try:
+        system_prompt = """You are an AI HR assistant for the Resume Screener application. Help users with:
+- Resume screening guidance
+- Job matching advice
+- HR best practices
+- Candidate evaluation tips
+- System usage instructions
+
+Be professional, helpful, and concise. If asked about technical system details, provide accurate information about the AI Resume Screener features."""
+
+        if context:
+            system_prompt += f"\n\nContext: {context}"
+
+        payload = {
+            "model": "meta/llama-3.1-8b-instruct",
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": message}
+            ],
+            "temperature": 0.7,
+            "max_tokens": 400,
+            "stream": False
+        }
+
+        headers = {
+            "Authorization": f"Bearer {NVIDIA_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(NVIDIA_API_URL, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        result = response.json()
+        ai_response = result["choices"][0]["message"]["content"].strip()
+
+        return {
+            "response": ai_response,
+            "timestamp": datetime.now().isoformat(),
+            "model": "meta/llama-3.1-8b-instruct"
+        }
+
+    except Exception as e:
+        print(f"NVIDIA API error: {e}")
+        return {
+            "response": "I'm sorry, I'm currently unable to assist. Please try again later or contact support.",
+            "timestamp": datetime.now().isoformat(),
+            "error": str(e)
+        }
 
 @app.get("/screening-results")
 def get_screening_results(job_id: Optional[str] = None):

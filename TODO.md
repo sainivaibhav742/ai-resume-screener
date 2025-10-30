@@ -56,8 +56,8 @@ This TODO list outlines the phased plan for building the AI Resume Screener usin
 - [x] Ensure privacy/security (encryption, GDPR)
 
 ## Phase 5: Advanced Ideas and Deployment (Expansion Phase)
-- [ ] Integrate LLMs (e.g., GPT-4 for summarization)
-- [ ] Build chatbot assistant
+- [x] Integrate LLMs (NVIDIA API for summarization and analysis)
+- [x] Build chatbot assistant (AI HR assistant with NVIDIA Llama)
 - [ ] Optimize for deployment (AWS/Render hosting)
 - [ ] Add monitoring, logging, performance optimizations
 - [ ] Conduct thorough testing (unit, integration, load)

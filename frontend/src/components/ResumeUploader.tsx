@@ -38,6 +38,8 @@ interface ScreeningResult {
   };
   fit_score: number;
   recommendation: string;
+  ai_summary: string;
+  ai_analysis: string;
 }
 
 export default function ResumeUploader() {
@@ -187,17 +189,17 @@ export default function ResumeUploader() {
           <button
             type="submit"
             disabled={isLoading || !file || !jobDescription.trim()}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center space-x-2"
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
           >
             {isLoading ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                <span>Analyzing Resume...</span>
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <span className="text-lg">AI Analysis in Progress...</span>
               </>
             ) : (
               <>
-                <Upload className="h-5 w-5" />
-                <span>Screen Resume</span>
+                <Upload className="h-6 w-6" />
+                <span className="text-lg">Analyze with AI</span>
               </>
             )}
           </button>
@@ -236,23 +238,30 @@ export default function ResumeUploader() {
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Analysis Results</h3>
 
               {/* Overall Score */}
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-semibold text-gray-900">Overall Fit Score</h4>
-                  <div className={`px-4 py-2 rounded-full font-bold ${getScoreColor(result.fit_score)}`}>
-                    {result.fit_score.toFixed(1)}%
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-2xl mb-8 shadow-lg">
+                <div className="text-center">
+                  <div className="mb-4">
+                    <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full font-bold text-2xl shadow-lg ${getScoreColor(result.fit_score)}`}>
+                      {result.fit_score.toFixed(0)}%
+                    </div>
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">AI Fit Score</h4>
+                  <p className={`text-lg font-semibold ${getRecommendationColor(result.recommendation)}`}>
+                    {result.recommendation}
+                  </p>
+                  <div className="mt-4 flex justify-center">
+                    <div className="bg-white/50 px-4 py-2 rounded-full">
+                      <span className="text-sm text-gray-600">Powered by NVIDIA AI</span>
+                    </div>
                   </div>
                 </div>
-                <p className={`text-lg font-medium ${getRecommendationColor(result.recommendation)}`}>
-                  {result.recommendation}
-                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Resume Data */}
-                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <FileText className="h-5 w-5 mr-2" />
+                    <FileText className="h-5 w-5 mr-2 text-blue-600" />
                     Resume Summary
                   </h4>
                   <div className="space-y-3">
@@ -282,8 +291,11 @@ export default function ResumeUploader() {
                 </div>
 
                 {/* Skill Gap Analysis */}
-                <div className="bg-white border border-gray-200 rounded-lg p-6">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Skill Gap Analysis</h4>
+                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <span className="mr-2">📊</span>
+                    Skill Gap Analysis
+                  </h4>
                   <div className="space-y-3">
                     <div>
                       <span className="font-medium text-gray-700">Present Skills:</span>
@@ -313,8 +325,11 @@ export default function ResumeUploader() {
                 </div>
 
                 {/* ATS Optimization */}
-                <div className="bg-white border border-gray-200 rounded-lg p-6">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">ATS Optimization</h4>
+                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <span className="mr-2">🎯</span>
+                    ATS Optimization
+                  </h4>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-700">Keyword Coverage:</span>
@@ -342,8 +357,11 @@ export default function ResumeUploader() {
                 </div>
 
                 {/* Language & Tone */}
-                <div className="bg-white border border-gray-200 rounded-lg p-6">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Language & Tone Analysis</h4>
+                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <span className="mr-2">💬</span>
+                    Language & Tone Analysis
+                  </h4>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-700">Sentiment:</span>
@@ -363,8 +381,11 @@ export default function ResumeUploader() {
                 </div>
 
                 {/* Bias Detection */}
-                <div className="bg-white border border-gray-200 rounded-lg p-6 md:col-span-2">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Bias Detection</h4>
+                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <span className="mr-2">⚖️</span>
+                    Bias Detection
+                  </h4>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-700">Bias Level:</span>
@@ -388,6 +409,29 @@ export default function ResumeUploader() {
                         </div>
                       </div>
                     )}
+                  </div>
+                </div>
+
+                {/* AI Summary & Analysis */}
+                <div className="bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-6 md:col-span-2 shadow-lg">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <span className="mr-2 text-2xl">🤖</span>
+                    AI-Powered Analysis
+                    <span className="ml-2 text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">NVIDIA Llama</span>
+                  </h4>
+                  <div className="space-y-4">
+                    <div>
+                      <h5 className="font-medium text-gray-700 mb-2">Resume Summary:</h5>
+                      <p className="text-gray-600 text-sm leading-relaxed bg-gray-50 p-3 rounded-lg">
+                        {result.ai_summary}
+                      </p>
+                    </div>
+                    <div>
+                      <h5 className="font-medium text-gray-700 mb-2">Detailed Fit Analysis:</h5>
+                      <p className="text-gray-600 text-sm leading-relaxed bg-blue-50 p-3 rounded-lg">
+                        {result.ai_analysis}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

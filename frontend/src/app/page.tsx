@@ -99,6 +99,13 @@ export default function Home() {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Semantic Matching</h3>
               <p className="text-gray-600">Advanced semantic similarity scoring beyond keyword matching</p>
             </div>
+            <div className="text-center p-6 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100">
+              <div className="bg-purple-600 p-3 rounded-full w-fit mx-auto mb-4">
+                <span className="text-white text-lg">🤖</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">AI Assistant</h3>
+              <p className="text-gray-600">NVIDIA-powered chatbot for HR guidance and resume analysis</p>
+            </div>
             <div className="text-center p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
               <div className="bg-gray-600 p-3 rounded-full w-fit mx-auto mb-4">
                 <Shield className="h-6 w-6 text-white" />
