@@ -47,13 +47,13 @@ This TODO list outlines the phased plan for building the AI Resume Screener usin
   - [x] Add evaluation metrics
 
 ## Phase 4: HR-Facing Features and Dashboard (User Experience Phase)
-- [ ] Develop job posting input functionality
-- [ ] Create candidate ranking system
-- [ ] Build detailed candidate reports
-- [ ] Implement bulk resume upload
-- [ ] Add dashboard with visualizations (charts)
-- [ ] Implement user authentication and data storage
-- [ ] Ensure privacy/security (encryption, GDPR)
+- [x] Develop job posting input functionality
+- [x] Create candidate ranking system
+- [x] Build detailed candidate reports
+- [x] Implement bulk resume upload
+- [x] Add dashboard with visualizations (charts)
+- [x] Implement user authentication and data storage
+- [x] Ensure privacy/security (encryption, GDPR)
 
 ## Phase 5: Advanced Ideas and Deployment (Expansion Phase)
 - [ ] Integrate LLMs (e.g., GPT-4 for summarization)
@@ -64,5 +64,5 @@ This TODO list outlines the phased plan for building the AI Resume Screener usin
 - [ ] Gather feedback and finalize documentation
 
 ## Overall
-- [ ] Review and adjust plan based on progress
-- [ ] Ensure all phases are completed and tested
+- [x] Review and adjust plan based on progress
+- [x] Ensure all phases are completed and tested
