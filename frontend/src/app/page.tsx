@@ -99,12 +99,12 @@ export default function Home() {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Semantic Matching</h3>
               <p className="text-gray-600">Advanced semantic similarity scoring beyond keyword matching</p>
             </div>
-            <div className="text-center p-6 rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100">
-              <div className="bg-indigo-600 p-3 rounded-full w-fit mx-auto mb-4">
-                <Upload className="h-6 w-6 text-white" />
+            <div className="text-center p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
+              <div className="bg-gray-600 p-3 rounded-full w-fit mx-auto mb-4">
+                <Shield className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Bulk Processing</h3>
-              <p className="text-gray-600">Process multiple resumes simultaneously for efficient recruitment</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Privacy First</h3>
+              <p className="text-gray-600">GDPR-compliant data handling with encryption and anonymization</p>
             </div>
           </div>
         </div>

@@ -43,6 +43,7 @@ interface ScreeningResult {
 export default function ResumeUploader() {
   const [file, setFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
+  const [jobId, setJobId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ScreeningResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +73,9 @@ export default function ResumeUploader() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("job_description", jobDescription);
+    if (jobId.trim()) {
+      formData.append("job_id", jobId);
+    }
 
     try {
       const response = await axios.post("http://127.0.0.1:8001/screen-resume", formData, {
@@ -157,6 +161,20 @@ export default function ResumeUploader() {
             />
           </div>
 
+          {/* Job ID (Optional) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Job ID (Optional)
+            </label>
+            <input
+              type="text"
+              value={jobId}
+              onChange={(e) => setJobId(e.target.value)}
+              placeholder="Enter job posting ID to associate this screening..."
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
           {/* Error Message */}
           {error && (
             <div className="flex items-center space-x-2 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -183,6 +201,32 @@ export default function ResumeUploader() {
               </>
             )}
           </button>
+
+          {/* Quick Job Posting */}
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Quick Job Posting</h4>
+            <p className="text-xs text-gray-600 mb-3">Create a job posting to organize screenings</p>
+            <button
+              type="button"
+              onClick={() => window.open('/job-posting', '_blank')}
+              className="w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm"
+            >
+              Create Job Posting
+            </button>
+          </div>
+
+          {/* Bulk Upload */}
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+            <h4 className="text-sm font-medium text-blue-700 mb-2">Bulk Resume Processing</h4>
+            <p className="text-xs text-blue-600 mb-3">Process multiple resumes at once</p>
+            <button
+              type="button"
+              onClick={() => alert('Bulk upload feature coming soon!')}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+            >
+              Bulk Upload (Coming Soon)
+            </button>
+          </div>
         </form>
 
         {/* Results */}

@@ -37,48 +37,67 @@ interface DashboardStats {
   scoreDistribution: { range: string; count: number }[];
 }
 
+interface ScreeningResult {
+  id: string;
+  candidate_name: string;
+  job_id: string | null;
+  fit_score: number;
+  predicted_role: string;
+  skills: string[];
+  experience_years: number;
+  timestamp: string;
+  recommendation: string;
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [screeningResults, setScreeningResults] = useState<ScreeningResult[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock data for demonstration
+  // Fetch real data from API
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setStats({
-        totalResumes: 247,
-        averageScore: 68.5,
-        topSkills: [
-          { skill: "Python", count: 89 },
-          { skill: "JavaScript", count: 76 },
-          { skill: "React", count: 65 },
-          { skill: "SQL", count: 58 },
-          { skill: "Machine Learning", count: 45 },
-        ],
-        roleDistribution: [
-          { role: "Software Engineer", count: 45 },
-          { role: "Data Scientist", count: 32 },
-          { role: "Product Manager", count: 28 },
-          { role: "UX Designer", count: 24 },
-          { role: "DevOps Engineer", count: 18 },
-        ],
-        weeklyActivity: [
-          { week: "Week 1", count: 12 },
-          { week: "Week 2", count: 18 },
-          { week: "Week 3", count: 25 },
-          { week: "Week 4", count: 32 },
-        ],
-        scoreDistribution: [
-          { range: "90-100", count: 23 },
-          { range: "80-89", count: 45 },
-          { range: "70-79", count: 67 },
-          { range: "60-69", count: 58 },
-          { range: "50-59", count: 34 },
-          { range: "0-49", count: 20 },
-        ],
-      });
-      setLoading(false);
-    }, 1000);
+    const fetchData = async () => {
+      try {
+        const [statsResponse, resultsResponse] = await Promise.all([
+          fetch("http://127.0.0.1:8001/dashboard-stats"),
+          fetch("http://127.0.0.1:8001/screening-results")
+        ]);
+
+        const statsData = await statsResponse.json();
+        const resultsData = await resultsResponse.json();
+
+        setStats(statsData);
+        setScreeningResults(resultsData.screening_results);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+        // Fallback to mock data if API fails
+        setStats({
+          totalResumes: 0,
+          averageScore: 0,
+          topSkills: [],
+          roleDistribution: [],
+          weeklyActivity: [
+            { week: "Week 1", count: 0 },
+            { week: "Week 2", count: 0 },
+            { week: "Week 3", count: 0 },
+            { week: "Week 4", count: 0 },
+          ],
+          scoreDistribution: [
+            { range: "90-100", count: 0 },
+            { range: "80-89", count: 0 },
+            { range: "70-79", count: 0 },
+            { range: "60-69", count: 0 },
+            { range: "50-59", count: 0 },
+            { range: "0-49", count: 0 },
+          ],
+        });
+        setScreeningResults([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   if (loading) {
@@ -169,6 +188,9 @@ export default function Dashboard() {
             <div className="bg-blue-100 p-3 rounded-full">
               <FileText className="h-6 w-6 text-blue-600" />
             </div>
+          </div>
+          <div className="mt-2">
+            <p className="text-xs text-gray-500">Privacy-protected data</p>
           </div>
         </div>
 
@@ -284,34 +306,32 @@ export default function Dashboard() {
       <div className="bg-white rounded-xl shadow-lg p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h3>
         <div className="space-y-4">
-          {[
-            { name: "John Doe", role: "Software Engineer", score: 85, time: "2 hours ago" },
-            { name: "Jane Smith", role: "Data Scientist", score: 92, time: "4 hours ago" },
-            { name: "Mike Johnson", role: "Product Manager", score: 78, time: "1 day ago" },
-            { name: "Sarah Wilson", role: "UX Designer", score: 88, time: "1 day ago" },
-          ].map((item, index) => (
+          {screeningResults.slice(-4).reverse().map((item: ScreeningResult, index: number) => (
             <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center space-x-4">
                 <div className="bg-blue-100 p-2 rounded-full">
                   <Users className="h-4 w-4 text-blue-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{item.name}</p>
-                  <p className="text-sm text-gray-600">{item.role}</p>
+                  <p className="font-medium text-gray-900">{item.candidate_name}</p>
+                  <p className="text-sm text-gray-600">{item.predicted_role}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
                 <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  item.score >= 80 ? 'bg-green-100 text-green-800' :
-                  item.score >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                  item.fit_score >= 80 ? 'bg-green-100 text-green-800' :
+                  item.fit_score >= 60 ? 'bg-yellow-100 text-yellow-800' :
                   'bg-red-100 text-red-800'
                 }`}>
-                  {item.score}%
+                  {item.fit_score}%
                 </div>
-                <span className="text-sm text-gray-500">{item.time}</span>
+                <span className="text-sm text-gray-500">{new Date(item.timestamp).toLocaleString()}</span>
               </div>
             </div>
           ))}
+          {screeningResults.length === 0 && (
+            <p className="text-gray-500 text-center py-8">No recent activity. Start screening resumes to see results here.</p>
+          )}
         </div>
       </div>
     </div>
