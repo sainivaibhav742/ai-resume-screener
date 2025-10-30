@@ -155,7 +155,8 @@ Create a `.env` file in the backend directory:
 
 ```env
 # NVIDIA API Configuration
-NVIDIA_API_KEY=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
+# Get your API key from: https://ngc.nvidia.com/setup/api-key
+NVIDIA_API_KEY=your_nvidia_api_key_here
 
 # Optional: Database Configuration (for production)
 DATABASE_URL=postgresql://user:password@localhost:5432/resume_screener
