@@ -122,16 +122,29 @@ source venv/bin/activate
 # Install Python dependencies
 pip install -r ../requirements.txt
 
+# Download spaCy language model
+python -m spacy download en_core_web_sm
+
 # Set NVIDIA API key (create .env file in project root)
 # Copy the provided .env file and update with your NVIDIA API key
 # Get your key from: https://ngc.nvidia.com/setup/api-key
 ```
 
-#### 3. Frontend Setup
+#### 3. Machine Learning Model Setup
+
+```bash
+# Navigate to ml directory
+cd ../ml
+
+# Train the job prediction model (optional - pre-trained model included)
+python train_models.py
+```
+
+#### 4. Frontend Setup
 
 ```bash
 # Open new terminal and navigate to frontend directory
-cd frontend
+cd ../frontend
 
 # Install Node.js dependencies
 npm install
@@ -140,12 +153,37 @@ npm install
 npm run dev
 ```
 
-#### 4. Start Backend Server
+#### 5. Start Backend Server
 
 ```bash
 # In backend terminal (with virtual environment activated)
+cd ../backend
 python main.py
 ```
+
+### Running the Application
+
+Once all components are set up:
+
+1. **Backend API** will be running on `http://127.0.0.1:8001`
+2. **Frontend Application** will be running on `http://localhost:3000`
+3. **API Documentation** available at `http://127.0.0.1:8001/docs`
+
+### Testing the Setup
+
+1. Open `http://localhost:3000` in your browser
+2. Upload the provided `test_resume.pdf` file
+3. Enter a sample job description (e.g., "Software Engineer with Python experience")
+4. Click "Analyze with AI" to test the resume screening functionality
+5. Try the AI Chat Assistant in the bottom-right corner
+6. Check the Dashboard for analytics
+
+### Troubleshooting
+
+- **Backend won't start**: Ensure virtual environment is activated and all dependencies are installed
+- **Frontend won't load**: Check that `npm install` completed successfully and no port conflicts
+- **API calls fail**: Verify NVIDIA API key is set correctly in `.env` file
+- **Model loading errors**: Ensure the ML model files are present in the `ml/` directory
 
 ### 🔧 Configuration
 
