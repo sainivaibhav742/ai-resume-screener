@@ -15,6 +15,11 @@ import json
 import hashlib
 from datetime import datetime
 import requests
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'ml'))
 from job_predictor import JobPredictor
 
@@ -467,15 +472,21 @@ def get_privacy_policy():
         "contact": "For privacy concerns, contact data@ai-resume-screener.com"
     }
 
+# In the environment variables loading section:
+if not os.getenv("NVIDIA_API_KEY"):
+    raise HTTPException(
+        status_code=500,
+        detail="NVIDIA_API_KEY not configured in environment variables"
+    )
+
+# In the chat_assistant endpoint:
 @app.post("/chat-assistant")
 async def chat_assistant(message: str = Form(...), context: Optional[str] = Form(None)):
-    """AI-powered chatbot assistant for HR queries using NVIDIA API"""
     if not NVIDIA_API_KEY:
-        return {
-            "response": "AI assistant is currently unavailable. Please check your NVIDIA API key configuration.",
-            "timestamp": datetime.now().isoformat(),
-            "error": "API key not configured"
-        }
+        raise HTTPException(
+            status_code=503,
+            detail="AI assistant unavailable - missing NVIDIA API configuration"
+        )
 
     try:
         system_prompt = """You are an AI HR assistant for the Resume Screener application. Help users with:
@@ -486,9 +497,6 @@ async def chat_assistant(message: str = Form(...), context: Optional[str] = Form
 - System usage instructions
 
 Be professional, helpful, and concise. If asked about technical system details, provide accurate information about the AI Resume Screener features."""
-
-        if context:
-            system_prompt += f"\n\nContext: {context}"
 
         payload = {
             "model": "meta/llama-3.1-8b-instruct",
@@ -518,6 +526,11 @@ Be professional, helpful, and concise. If asked about technical system details, 
             "model": "meta/llama-3.1-8b-instruct"
         }
 
+    except requests.exceptions.HTTPError as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"NVIDIA API error: {e.response.text}"
+        )
     except Exception as e:
         print(f"NVIDIA API error: {e}")
         return {
