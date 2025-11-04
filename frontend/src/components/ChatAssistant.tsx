@@ -42,7 +42,7 @@ export default function ChatAssistant() {
       const formData = new FormData();
       formData.append("message", message);
 
-      const response = await axios.post("http://127.0.0.1:8003/chat-assistant", formData);
+      const response = await axios.post("http://127.0.0.1:8001/chat-assistant", formData);
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),

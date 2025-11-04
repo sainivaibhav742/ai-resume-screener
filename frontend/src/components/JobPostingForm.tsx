@@ -26,7 +26,7 @@ export default function JobPostingForm() {
     formData.append("requirements", requirements);
 
     try {
-      const response = await axios.post("http://127.0.0.1:8003/create-job-posting", formData);
+      const response = await axios.post("http://127.0.0.1:8001/create-job-posting", formData);
       setJobId(response.data.job_id);
       setSuccess(true);
     } catch (err) {

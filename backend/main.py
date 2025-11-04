@@ -35,7 +35,7 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Load job predictor model
 job_predictor = JobPredictor()
-job_predictor.load_model('../ml/job_predictor_model.pkl')
+job_predictor.load_model('job_predictor_model.pkl')
 
 # NVIDIA API configuration
 NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
