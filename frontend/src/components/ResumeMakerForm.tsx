@@ -49,6 +49,38 @@ const templates = [
     icon: "👔",
     color: "from-green-600 to-teal-600",
     features: ["Leadership focus", "Achievement oriented", "Executive summary", "Strategic layout"]
+  },
+  {
+    id: "minimalist",
+    name: "Minimalist Clean",
+    description: "Ultra-clean design focusing on content with subtle elegance",
+    icon: "✨",
+    color: "from-slate-400 to-slate-600",
+    features: ["Ultra-minimal", "Content-focused", "Elegant spacing", "Timeless appeal"]
+  },
+  {
+    id: "tech",
+    name: "Tech Modern",
+    description: "Dark theme with neon accents perfect for tech professionals",
+    icon: "💻",
+    color: "from-indigo-600 to-purple-800",
+    features: ["Dark theme", "Neon accents", "Tech-inspired", "Modern aesthetics"]
+  },
+  {
+    id: "academic",
+    name: "Academic & Research",
+    description: "Structured format ideal for researchers and academics",
+    icon: "🎓",
+    color: "from-emerald-500 to-teal-600",
+    features: ["Research focus", "Publication ready", "Academic structure", "Professional credibility"]
+  },
+  {
+    id: "startup",
+    name: "Startup Dynamic",
+    description: "Bold and energetic design for startup culture and innovation",
+    icon: "🚀",
+    color: "from-orange-500 to-red-600",
+    features: ["Bold design", "Energetic layout", "Innovation focus", "Startup culture"]
   }
 ];
 
@@ -319,6 +351,134 @@ export default function ResumeMakerForm() {
                                   <li>• Directed development of critical system components</li>
                                   <li>• Achieved 40% performance improvement through strategic optimization</li>
                                   <li>• Led cross-functional team of 8 developers</li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {template.id === 'minimalist' && (
+                        <div className="p-4 bg-white border border-gray-100">
+                          <div className="mb-4">
+                            <h3 className="text-xl font-light text-gray-900 mb-1 tracking-wide">John Doe</h3>
+                            <p className="text-sm text-gray-600 font-light">Software Engineer</p>
+                            <div className="flex flex-wrap gap-2 text-xs text-gray-500 mt-2">
+                              <span>john@email.com</span>
+                              <span>•</span>
+                              <span>(555) 123-4567</span>
+                              <span>•</span>
+                              <span>New York, NY</span>
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <div>
+                              <h4 className="text-xs font-medium text-gray-900 uppercase tracking-wider mb-2">Experience</h4>
+                              <div className="space-y-2">
+                                <div>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="font-light text-gray-900">Senior Developer</span>
+                                    <span className="text-gray-500">2020-Present</span>
+                                  </div>
+                                  <p className="text-xs text-gray-600">Tech Corp, New York</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {template.id === 'tech' && (
+                        <div className="p-4 bg-gray-900 text-white">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h3 className="text-lg font-bold mb-1 text-cyan-400">John Doe</h3>
+                              <p className="text-sm text-purple-400">Software Engineer</p>
+                              <p className="text-xs text-gray-400 mt-1">New York, NY • john@email.com • (555) 123-4567</p>
+                            </div>
+                            <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full flex items-center justify-center text-xs font-bold">
+                              JD
+                            </div>
+                          </div>
+                          <div className="border-t border-gray-700 pt-3">
+                            <h4 className="text-xs font-bold text-cyan-400 mb-2 uppercase tracking-wide">// EXPERIENCE</h4>
+                            <div className="space-y-2">
+                              <div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="font-semibold text-white">Senior Developer</span>
+                                  <span className="text-gray-400">2020-Present</span>
+                                </div>
+                                <p className="text-xs text-gray-400 mb-1">Tech Corp</p>
+                                <ul className="text-xs text-gray-300 space-y-1">
+                                  <li>• Led development of key features</li>
+                                  <li>• Improved system performance by 40%</li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {template.id === 'academic' && (
+                        <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50">
+                          <div className="text-center mb-4 pb-2 border-b border-emerald-200">
+                            <h3 className="text-xl font-serif text-gray-900 mb-1">John Doe, PhD</h3>
+                            <p className="text-sm text-emerald-700 font-medium">Research Scientist</p>
+                            <p className="text-xs text-gray-600 mt-1">Department of Computer Science • University Name</p>
+                            <div className="flex justify-center space-x-3 text-xs text-gray-600 mt-2">
+                              <span>📧 john@email.com</span>
+                              <span>📱 (555) 123-4567</span>
+                              <span>📍 New York, NY</span>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-serif text-gray-900 mb-2 uppercase tracking-wide">Research & Publications</h4>
+                            <div className="space-y-2">
+                              <div>
+                                <div className="flex justify-between text-sm mb-1">
+                                  <span className="font-medium text-gray-900">Senior Research Fellow</span>
+                                  <span className="text-emerald-600">2020-Present</span>
+                                </div>
+                                <p className="text-xs text-gray-600 mb-1">University Research Lab</p>
+                                <ul className="text-xs text-gray-700 space-y-1">
+                                  <li>• Published 15+ papers in top-tier journals</li>
+                                  <li>• Secured $2M in research funding</li>
+                                  <li>• Supervised 5 PhD students</li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {template.id === 'startup' && (
+                        <div className="p-4 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
+                          <div className="flex items-center space-x-4 mb-4">
+                            <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                              J
+                            </div>
+                            <div>
+                              <h3 className="text-xl font-bold text-gray-900 mb-1">John Doe</h3>
+                              <p className="text-sm text-orange-600 font-medium">Startup Founder & CTO</p>
+                              <p className="text-xs text-gray-600">New York, NY • john@email.com</p>
+                            </div>
+                          </div>
+                          <div className="border-l-4 border-orange-500 pl-4">
+                            <h4 className="text-sm font-bold text-gray-900 mb-2 flex items-center">
+                              <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                              Journey
+                            </h4>
+                            <div className="space-y-2">
+                              <div>
+                                <div className="flex justify-between text-sm mb-1">
+                                  <span className="font-semibold text-gray-900">Co-Founder & CTO</span>
+                                  <span className="text-orange-600 font-medium">2020-Present</span>
+                                </div>
+                                <p className="text-xs text-gray-600 mb-1">Tech Startup Inc.</p>
+                                <ul className="text-xs text-gray-700 space-y-1">
+                                  <li>🚀 Built MVP from 0 to 10K users in 6 months</li>
+                                  <li>💰 Raised $5M in Series A funding</li>
+                                  <li>👥 Scaled engineering team from 3 to 25</li>
                                 </ul>
                               </div>
                             </div>
@@ -889,6 +1049,355 @@ Skills: JavaScript, React, Node.js, Python, AWS"
                             <div className="grid grid-cols-2 gap-2">
                               {parsedData.skills.map((skill: string, index: number) => (
                                 <div key={index} className="text-gray-700 text-sm">• {skill}</div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedTemplate === 'minimalist' && (
+                      <div className="p-8 bg-white max-h-[11in] max-w-[8.5in] mx-auto font-sans leading-relaxed overflow-hidden">
+                        {/* Header Section */}
+                        <div className="mb-6">
+                          <h1 className="text-3xl font-light text-gray-900 mb-2 tracking-wide">{parsedData.personal_info?.name || "Your Name"}</h1>
+                          <p className="text-xl text-gray-600 mb-4 font-light">
+                            {parsedData.experiences?.[0]?.title || "Professional Title"}
+                          </p>
+                          <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                            {parsedData.personal_info?.email && (
+                              <span>{parsedData.personal_info.email}</span>
+                            )}
+                            {parsedData.personal_info?.phone && (
+                              <span>{parsedData.personal_info.phone}</span>
+                            )}
+                            {parsedData.personal_info?.location && (
+                              <span>{parsedData.personal_info.location}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Summary Section */}
+                        {parsedData.summary && (
+                          <div className="mb-6">
+                            <p className="text-gray-700 leading-relaxed text-justify text-sm">{parsedData.summary}</p>
+                          </div>
+                        )}
+
+                        {/* Experience Section */}
+                        {parsedData.experiences?.length > 0 && (
+                          <div className="mb-6">
+                            <h3 className="text-lg font-light text-gray-900 mb-4 uppercase tracking-wider">Experience</h3>
+                            <div className="space-y-4">
+                              {parsedData.experiences.map((exp: any, index: number) => (
+                                <div key={index}>
+                                  <div className="flex justify-between items-start mb-1">
+                                    <div className="flex-1 pr-2">
+                                      <h4 className="font-light text-gray-900 text-base">{exp.title}</h4>
+                                      <p className="text-gray-600 text-sm font-light">{exp.company}</p>
+                                    </div>
+                                    <span className="text-gray-500 text-sm">{exp.duration}</span>
+                                  </div>
+                                  {exp.description && (
+                                    <div className="text-gray-700 leading-relaxed mt-2 text-sm">{exp.description}</div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Education Section */}
+                        {parsedData.educations?.length > 0 && (
+                          <div className="mb-6">
+                            <h3 className="text-lg font-light text-gray-900 mb-4 uppercase tracking-wider">Education</h3>
+                            <div className="space-y-3">
+                              {parsedData.educations.map((edu: any, index: number) => (
+                                <div key={index} className="flex justify-between items-start">
+                                  <div className="flex-1 pr-2">
+                                    <h4 className="font-light text-gray-900 text-base">{edu.degree}</h4>
+                                    <p className="text-gray-600 text-sm font-light">{edu.institution}</p>
+                                  </div>
+                                  <span className="text-gray-500 text-sm">{edu.year}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Skills Section */}
+                        {parsedData.skills?.length > 0 && (
+                          <div className="mb-4">
+                            <h3 className="text-lg font-light text-gray-900 mb-4 uppercase tracking-wider">Skills</h3>
+                            <div className="flex flex-wrap gap-2">
+                              {parsedData.skills.map((skill: string, index: number) => (
+                                <span key={index} className="text-gray-700 text-sm">{skill}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedTemplate === 'tech' && (
+                      <div className="p-8 bg-gray-900 text-white max-h-[11in] max-w-[8.5in] mx-auto font-mono leading-relaxed overflow-hidden">
+                        {/* Header Section */}
+                        <div className="flex justify-between items-start mb-6 pb-4 border-b border-gray-700">
+                          <div className="flex-1 pr-4">
+                            <h1 className="text-2xl font-bold text-cyan-400 mb-2">// {parsedData.personal_info?.name || "Your Name"}</h1>
+                            <p className="text-lg text-purple-400 mb-3 font-medium">
+                              {parsedData.experiences?.[0]?.title || "Professional Title"}
+                            </p>
+                            <div className="flex flex-wrap gap-4 text-sm text-gray-400">
+                              {parsedData.personal_info?.email && (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-cyan-400">📧</span>
+                                  <span>{parsedData.personal_info.email}</span>
+                                </div>
+                              )}
+                              {parsedData.personal_info?.phone && (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-cyan-400">📱</span>
+                                  <span>{parsedData.personal_info.phone}</span>
+                                </div>
+                              )}
+                              {parsedData.personal_info?.location && (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-cyan-400">📍</span>
+                                  <span>{parsedData.personal_info.location}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="w-16 h-16 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full flex items-center justify-center text-black font-bold text-xl shadow-lg">
+                            {(parsedData.personal_info?.name || "Y")[0].toUpperCase()}
+                          </div>
+                        </div>
+
+                        {/* Summary Section */}
+                        {parsedData.summary && (
+                          <div className="mb-6">
+                            <h3 className="text-cyan-400 font-bold mb-3">// SUMMARY</h3>
+                            <p className="text-gray-300 leading-relaxed text-sm pl-4 border-l-2 border-cyan-400">{parsedData.summary}</p>
+                          </div>
+                        )}
+
+                        {/* Experience Section */}
+                        {parsedData.experiences?.length > 0 && (
+                          <div className="mb-6">
+                            <h3 className="text-cyan-400 font-bold mb-4">// EXPERIENCE</h3>
+                            <div className="space-y-4">
+                              {parsedData.experiences.map((exp: any, index: number) => (
+                                <div key={index} className="pl-4 border-l-2 border-purple-500">
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div className="flex-1 pr-2">
+                                      <h4 className="font-bold text-white text-base">{exp.title}</h4>
+                                      <p className="text-purple-400 text-sm">{exp.company}</p>
+                                    </div>
+                                    <span className="text-cyan-400 bg-gray-800 px-2 py-1 rounded text-xs">{exp.duration}</span>
+                                  </div>
+                                  {exp.description && (
+                                    <div className="text-gray-300 leading-relaxed text-sm">{exp.description}</div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Education Section */}
+                        {parsedData.educations?.length > 0 && (
+                          <div className="mb-6">
+                            <h3 className="text-cyan-400 font-bold mb-4">// EDUCATION</h3>
+                            <div className="space-y-3 pl-4 border-l-2 border-purple-500">
+                              {parsedData.educations.map((edu: any, index: number) => (
+                                <div key={index} className="flex justify-between items-start">
+                                  <div className="flex-1 pr-2">
+                                    <h4 className="font-bold text-white text-base">{edu.degree}</h4>
+                                    <p className="text-gray-400 text-sm">{edu.institution}</p>
+                                  </div>
+                                  <span className="text-cyan-400 bg-gray-800 px-2 py-1 rounded text-xs">{edu.year}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Skills Section */}
+                        {parsedData.skills?.length > 0 && (
+                          <div className="mb-4">
+                            <h3 className="text-cyan-400 font-bold mb-4">// SKILLS</h3>
+                            <div className="flex flex-wrap gap-3 pl-4 border-l-2 border-purple-500">
+                              {parsedData.skills.map((skill: string, index: number) => (
+                                <span key={index} className="bg-gradient-to-r from-cyan-500 to-purple-500 text-black px-3 py-1 rounded-full text-sm font-medium">
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedTemplate === 'academic' && (
+                      <div className="p-8 bg-gradient-to-br from-emerald-50 to-teal-50 max-h-[11in] max-w-[8.5in] mx-auto font-serif leading-relaxed overflow-hidden">
+                        {/* Header Section */}
+                        <div className="text-center mb-6 pb-4 border-b-2 border-emerald-300">
+                          <h1 className="text-3xl font-serif text-gray-900 mb-2">{parsedData.personal_info?.name || "Your Name"}</h1>
+                          <p className="text-xl text-emerald-700 mb-3 font-medium">
+                            {parsedData.experiences?.[0]?.title || "Research Professional"}
+                          </p>
+                          <div className="text-sm text-gray-600 mb-2">
+                            {parsedData.educations?.[0]?.institution || "Academic Institution"}
+                          </div>
+                          <div className="flex justify-center space-x-6 text-sm text-gray-600">
+                            {parsedData.personal_info?.email && <span>📧 {parsedData.personal_info.email}</span>}
+                            {parsedData.personal_info?.phone && <span>📱 {parsedData.personal_info.phone}</span>}
+                            {parsedData.personal_info?.location && <span>📍 {parsedData.personal_info.location}</span>}
+                          </div>
+                        </div>
+
+                        {/* Summary Section */}
+                        {parsedData.summary && (
+                          <div className="mb-6">
+                            <h3 className="text-lg font-serif text-gray-900 mb-3 uppercase tracking-wide border-b border-emerald-300 pb-1">Professional Summary</h3>
+                            <p className="text-gray-700 leading-relaxed text-justify indent-8 text-sm">{parsedData.summary}</p>
+                          </div>
+                        )}
+
+                        {/* Experience/Research Section */}
+                        {parsedData.experiences?.length > 0 && (
+                          <div className="mb-6">
+                            <h3 className="text-lg font-serif text-gray-900 mb-4 uppercase tracking-wide border-b border-emerald-300 pb-1">Research & Professional Experience</h3>
+                            <div className="space-y-4">
+                              {parsedData.experiences.map((exp: any, index: number) => (
+                                <div key={index}>
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div className="flex-1 pr-2">
+                                      <h4 className="font-medium text-gray-900 text-base">{exp.title}</h4>
+                                      <p className="text-emerald-700 text-sm italic">{exp.company}</p>
+                                    </div>
+                                    <span className="text-gray-600 bg-emerald-100 px-2 py-1 rounded text-xs">{exp.duration}</span>
+                                  </div>
+                                  {exp.description && (
+                                    <div className="text-gray-700 leading-relaxed text-sm indent-4">{exp.description}</div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Education Section */}
+                        {parsedData.educations?.length > 0 && (
+                          <div className="mb-6">
+                            <h3 className="text-lg font-serif text-gray-900 mb-4 uppercase tracking-wide border-b border-emerald-300 pb-1">Education</h3>
+                            <div className="space-y-3">
+                              {parsedData.educations.map((edu: any, index: number) => (
+                                <div key={index} className="flex justify-between items-start">
+                                  <div className="flex-1 pr-2">
+                                    <h4 className="font-medium text-gray-900 text-base">{edu.degree}</h4>
+                                    <p className="text-gray-600 text-sm">{edu.institution}</p>
+                                  </div>
+                                  <span className="text-gray-600 bg-emerald-100 px-2 py-1 rounded text-xs">{edu.year}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Skills/Competencies Section */}
+                        {parsedData.skills?.length > 0 && (
+                          <div className="mb-4">
+                            <h3 className="text-lg font-serif text-gray-900 mb-4 uppercase tracking-wide border-b border-emerald-300 pb-1">Research Competencies & Skills</h3>
+                            <div className="text-gray-700 leading-relaxed text-sm">
+                              {parsedData.skills.join(' • ')}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedTemplate === 'startup' && (
+                      <div className="p-6 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 max-h-[11in] max-w-[8.5in] mx-auto overflow-hidden">
+                        <div className="flex items-center space-x-4 mb-6">
+                          <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-xl">
+                            {(parsedData.personal_info?.name || "Y")[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-1">{parsedData.personal_info?.name || "Your Name"}</h1>
+                            <p className="text-xl text-orange-600 font-medium">
+                              {parsedData.experiences?.[0]?.title || "Startup Professional"}
+                            </p>
+                            <div className="text-sm text-gray-600 mt-2">
+                              {parsedData.personal_info?.email && <div>{parsedData.personal_info.email}</div>}
+                              {parsedData.personal_info?.phone && <div>{parsedData.personal_info.phone}</div>}
+                              {parsedData.personal_info?.location && <div>{parsedData.personal_info.location}</div>}
+                            </div>
+                          </div>
+                        </div>
+
+                        {parsedData.summary && (
+                          <div className="mb-6">
+                            <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
+                              <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
+                              Mission
+                            </h3>
+                            <p className="text-gray-700 leading-relaxed text-base">{parsedData.summary}</p>
+                          </div>
+                        )}
+
+                        {parsedData.experiences?.length > 0 && (
+                          <div className="mb-6">
+                            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                              <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
+                              Journey
+                            </h3>
+                            <div className="space-y-4">
+                              {parsedData.experiences.map((exp: any, index: number) => (
+                                <div key={index} className="border-l-4 border-orange-500 pl-6">
+                                  <div className="flex justify-between items-start mb-2">
+                                    <h4 className="font-bold text-gray-900 text-lg">{exp.title}</h4>
+                                    <span className="text-orange-600 bg-orange-100 px-3 py-1 rounded-full text-sm font-medium">{exp.duration}</span>
+                                  </div>
+                                  <p className="text-gray-600 mb-2 text-base">{exp.company}</p>
+                                  {exp.description && (
+                                    <div className="text-gray-700 whitespace-pre-line text-sm leading-relaxed">{exp.description}</div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {parsedData.educations?.length > 0 && (
+                          <div className="mb-6">
+                            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                              <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
+                              Foundation
+                            </h3>
+                            <div className="space-y-3">
+                              {parsedData.educations.map((edu: any, index: number) => (
+                                <div key={index}>
+                                  <h4 className="font-bold text-gray-900 text-lg">{edu.degree}</h4>
+                                  <p className="text-gray-600 text-base">{edu.institution} {edu.year && `• ${edu.year}`}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {parsedData.skills?.length > 0 && (
+                          <div className="mb-4">
+                            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                              <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
+                              Superpowers
+                            </h3>
+                            <div className="flex flex-wrap gap-3">
+                              {parsedData.skills.map((skill: string, index: number) => (
+                                <span key={index} className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md">
+                                  {skill}
+                                </span>
                               ))}
                             </div>
                           </div>
