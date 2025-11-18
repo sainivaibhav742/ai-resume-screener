@@ -38,7 +38,7 @@ class JobPredictor:
         else:
             raise FileNotFoundError(f"Model file not found at {path}")
 
-# Sample training data (in a real scenario, use a larger dataset)
+# Sample training data (expanded for better model performance)
 sample_data = [
     ("Python developer with experience in Django and Flask", "Software Engineer"),
     ("Data scientist skilled in machine learning and statistics", "Data Scientist"),
@@ -49,7 +49,37 @@ sample_data = [
     ("Sales representative with CRM experience", "Sales Representative"),
     ("HR manager with recruitment and employee relations", "HR Manager"),
     ("Financial analyst with Excel and forecasting", "Financial Analyst"),
-    ("Teacher with classroom management skills", "Teacher")
+    ("Teacher with classroom management skills", "Teacher"),
+    ("Full stack developer with React, Node.js, and PostgreSQL", "Software Engineer"),
+    ("Machine learning engineer with TensorFlow and PyTorch", "Data Scientist"),
+    ("Product manager with roadmap planning and stakeholder management", "Project Manager"),
+    ("Graphic designer with Adobe Creative Suite and branding", "Designer"),
+    ("Cloud engineer with Kubernetes and microservices", "DevOps Engineer"),
+    ("Digital marketing manager with Google Ads and analytics", "Marketing Specialist"),
+    ("Business development representative with lead generation", "Sales Representative"),
+    ("Talent acquisition specialist with ATS systems", "HR Manager"),
+    ("Investment analyst with financial modeling", "Financial Analyst"),
+    ("Professor with PhD in computer science", "Teacher"),
+    ("Java developer with Spring Boot and microservices", "Software Engineer"),
+    ("Data analyst with SQL, Tableau, and business intelligence", "Data Scientist"),
+    ("Scrum master with certification and team facilitation", "Project Manager"),
+    ("Web designer with HTML, CSS, and JavaScript", "Designer"),
+    ("Infrastructure engineer with Terraform and AWS", "DevOps Engineer"),
+    ("Content strategist with SEO and social media marketing", "Marketing Specialist"),
+    ("Account executive with SaaS sales experience", "Sales Representative"),
+    ("Employee relations manager with conflict resolution", "HR Manager"),
+    ("Portfolio manager with risk assessment", "Financial Analyst"),
+    ("Elementary school teacher with Montessori certification", "Teacher"),
+    ("C++ developer with game engine development", "Software Engineer"),
+    ("NLP researcher with BERT and transformers", "Data Scientist"),
+    ("Program manager with cross-functional coordination", "Project Manager"),
+    ("Motion graphics designer with After Effects", "Designer"),
+    ("Site reliability engineer with monitoring tools", "DevOps Engineer"),
+    ("Brand manager with campaign development", "Marketing Specialist"),
+    ("Retail sales associate with customer service", "Sales Representative"),
+    ("Diversity and inclusion coordinator", "HR Manager"),
+    ("Credit analyst with underwriting experience", "Financial Analyst"),
+    ("Special education teacher with IEP development", "Teacher")
 ]
 
 if __name__ == "__main__":
@@ -57,5 +87,5 @@ if __name__ == "__main__":
     X = [text for text, _ in sample_data]
     y = [label for _, label in sample_data]
     predictor.train(X, y)
-    predictor.save_model('ai-resume-screener/ml/job_predictor_model.pkl')
+    predictor.save_model('ml/job_predictor_model.pkl')
     print("Model trained and saved.")

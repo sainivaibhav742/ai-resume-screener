@@ -12,6 +12,8 @@ import os
 import sys
 import tempfile
 import json
+from typing import Dict, List
+from pydantic import BaseModel
 import hashlib
 from datetime import datetime
 import requests
@@ -20,8 +22,25 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'ml'))
-from job_predictor import JobPredictor
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
+from ml.job_predictor import JobPredictor
+
+class SummaryRequest(BaseModel):
+    experience_data: Dict
+    job_title: str
+
+class SkillsRequest(BaseModel):
+    job_title: str
+    current_skills: List[str]
+
+class OptimizeRequest(BaseModel):
+    section_type: str
+    content: str
+    job_title: str
+
+class ParseResumeRequest(BaseModel):
+    raw_text: str
 
 app = FastAPI(title="AI Resume Screener", description="NLP-powered resume screening API")
 
@@ -40,7 +59,8 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Load job predictor model
 job_predictor = JobPredictor()
-job_predictor.load_model('job_predictor_model.pkl')
+model_path = os.path.join(os.path.dirname(__file__), '..', 'ml', 'job_predictor_model.pkl')
+job_predictor.load_model(model_path)
 
 # NVIDIA API configuration
 NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
@@ -618,6 +638,548 @@ def get_dashboard_stats():
         "weekly_activity": weekly_activity,
         "score_distribution": score_distribution
     }
+
+@app.post("/generate-resume-summary-ai")
+async def generate_resume_summary_ai(request: SummaryRequest):
+    """Generate AI-powered resume summary from experience data"""
+    if not NVIDIA_API_KEY:
+        return {"summary": "Professional with extensive experience in their field. Skilled in various technical and soft skills relevant to their career."}
+
+    try:
+        experience_data = request.experience_data
+        job_title = request.job_title
+        # Format experience data
+        experience_text = ""
+        for exp in experience_data.get("experiences", []):
+            experience_text += f"- {exp.get('title', '')} at {exp.get('company', '')} ({exp.get('duration', '')}): {exp.get('description', '')}\n"
+
+        prompt = f"""Create a compelling professional summary for a resume based on the following experience and target job title:
+
+Target Job Title: {job_title}
+
+Experience:
+{experience_text}
+
+Please write a concise, professional summary paragraph (2-3 sentences) that highlights key achievements, skills, and career progression. Make it tailored to the target job title and compelling for recruiters."""
+
+        payload = {
+            "model": "meta/llama-3.1-8b-instruct",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.7,
+            "max_tokens": 200,
+            "stream": False
+        }
+
+        headers = {
+            "Authorization": f"Bearer {NVIDIA_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(NVIDIA_API_URL, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        result = response.json()
+        return {"summary": result["choices"][0]["message"]["content"].strip()}
+
+    except Exception as e:
+        print(f"NVIDIA API error: {e}")
+        return {"summary": "Professional with extensive experience in their field. Skilled in various technical and soft skills relevant to their career."}
+
+@app.post("/suggest-skills-ai")
+async def suggest_skills_ai(request: SkillsRequest):
+    """Suggest additional skills based on job title and current skills"""
+    if not NVIDIA_API_KEY:
+        return {"suggested_skills": ["Communication", "Problem Solving", "Team Work", "Project Management"]}
+
+    try:
+        job_title = request.job_title
+        current_skills = request.current_skills
+        skills_text = ", ".join(current_skills) if current_skills else "none specified"
+
+        prompt = f"""Based on the job title "{job_title}" and current skills: {skills_text}
+
+Suggest 5-8 additional relevant skills that would strengthen a resume for this position. Focus on both technical and soft skills that are commonly required or beneficial for this role.
+
+Return only the skills as a comma-separated list, no explanations."""
+
+        payload = {
+            "model": "meta/llama-3.1-8b-instruct",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.6,
+            "max_tokens": 150,
+            "stream": False
+        }
+
+        headers = {
+            "Authorization": f"Bearer {NVIDIA_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(NVIDIA_API_URL, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        result = response.json()
+        skills_list = [skill.strip() for skill in result["choices"][0]["message"]["content"].strip().split(",")]
+        return {"suggested_skills": skills_list}
+
+    except Exception as e:
+        print(f"NVIDIA API error: {e}")
+        return {"suggested_skills": ["Communication", "Problem Solving", "Team Work", "Project Management"]}
+
+@app.post("/optimize-resume-section")
+async def optimize_resume_section(request: OptimizeRequest):
+    """Optimize a resume section using AI"""
+    if not NVIDIA_API_KEY:
+        return {"optimized_content": content}
+
+    try:
+        section_type = request.section_type
+        content = request.content
+        job_title = request.job_title
+
+        section_prompts = {
+            "experience": f"Rewrite this work experience description to be more impactful and ATS-friendly for a {job_title} position. Make it achievement-oriented and use strong action verbs:",
+            "summary": f"Optimize this professional summary to be more compelling for a {job_title} role. Make it concise and impactful:",
+            "skills": f"Optimize this skills section for a {job_title} position. Ensure it's relevant and well-organized:"
+        }
+
+        prompt = section_prompts.get(section_type, "Optimize this resume content:") + f"\n\n{content}"
+
+        payload = {
+            "model": "meta/llama-3.1-8b-instruct",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.7,
+            "max_tokens": 300,
+            "stream": False
+        }
+
+        headers = {
+            "Authorization": f"Bearer {NVIDIA_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(NVIDIA_API_URL, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        result = response.json()
+        return {"optimized_content": result["choices"][0]["message"]["content"].strip()}
+
+    except Exception as e:
+        print(f"NVIDIA API error: {e}")
+        return {"optimized_content": content}
+
+@app.post("/parse-resume-ai")
+async def parse_resume_ai(request: ParseResumeRequest):
+    """Parse raw text into structured resume data using AI"""
+    if not NVIDIA_API_KEY:
+        # Fallback parsing using basic text analysis
+        return parse_resume_fallback(request.raw_text)
+
+    try:
+        prompt = f"""Parse the following raw text into structured resume data. Extract and organize the information into these categories.
+
+CRITICAL INSTRUCTIONS:
+1. DO NOT copy text directly from the input as job titles. Create proper, concise job titles (2-4 words max).
+2. DO NOT duplicate content between summary and experience descriptions.
+3. The summary should be a high-level overview (2-3 sentences) highlighting key qualifications.
+4. Experience descriptions should be specific achievements and responsibilities, not generic descriptions.
+5. If the input text is one long paragraph describing skills/experience, break it down into appropriate job roles.
+
+First, here are some examples:
+
+Example 1 Input:
+John Doe
+Software Engineer
+Email: john@email.com
+Phone: (555) 123-4567
+Location: New York, NY
+
+Experience:
+- Senior Developer at Tech Corp (2020-Present)
+  Led development of key features, improved performance by 40%
+- Junior Developer at Startup Inc (2018-2020)
+  Built web applications using React and Node.js
+
+Education:
+- Bachelor's in Computer Science, University of Tech (2016-2020)
+
+Skills: JavaScript, React, Node.js, Python
+
+Example 1 Output:
+{{
+  "personal_info": {{
+    "name": "John Doe",
+    "email": "john@email.com",
+    "phone": "(555) 123-4567",
+    "location": "New York, NY"
+  }},
+  "summary": "Experienced Software Engineer with 5+ years of expertise in full-stack development, specializing in React and Node.js applications. Proven track record of delivering high-quality solutions and leading development teams.",
+  "experiences": [
+    {{
+      "title": "Senior Developer",
+      "company": "Tech Corp",
+      "duration": "2020-Present",
+      "description": "Led development of key features and improved system performance by 40%. Managed team of developers and implemented best practices for scalable software architecture."
+    }},
+    {{
+      "title": "Junior Developer",
+      "company": "Startup Inc",
+      "duration": "2018-2020",
+      "description": "Built web applications using React and Node.js. Collaborated with cross-functional teams on product development and contributed to agile development processes."
+    }}
+  ],
+  "educations": [
+    {{
+      "degree": "Bachelor's in Computer Science",
+      "institution": "University of Tech",
+      "year": "2020"
+    }}
+  ],
+  "skills": ["JavaScript", "React", "Node.js", "Python"]
+}}
+
+Example 2 Input (long paragraph format):
+I am a highly driven Technical Lead and Co-Founder with hands-on experience building and managing complete engineering operations for a startup environment. Skilled in overseeing the full technical department from backend development and APIs to cloud infrastructure and deployment pipelines. Strong expertise in Django, cloud messaging tools like Twilio, AWS services, Docker, Git.
+
+Example 2 Output:
+{{
+  "personal_info": {{
+    "name": "Your Name",
+    "email": "",
+    "phone": "",
+    "location": ""
+  }},
+  "summary": "Technical Lead and Co-Founder with extensive experience in engineering operations and full-stack development. Expert in backend technologies, cloud infrastructure, and deployment pipelines with a focus on scalable solutions.",
+  "experiences": [
+    {{
+      "title": "Technical Lead & Co-Founder",
+      "company": "Startup Company",
+      "duration": "Recent",
+      "description": "Built and managed complete engineering operations including backend development, API design, and cloud infrastructure. Oversaw technical department and implemented deployment pipelines using Docker and Git."
+    }}
+  ],
+  "educations": [],
+  "skills": ["Django", "AWS", "Docker", "Git", "Twilio", "Backend Development", "APIs"]
+}}
+
+Now parse this raw text:
+
+Raw Text:
+{request.raw_text}
+
+Please return a JSON object with this exact structure:
+{{
+  "personal_info": {{
+    "name": "Full Name",
+    "email": "email@example.com",
+    "phone": "phone number",
+    "location": "City, State/Country"
+  }},
+  "summary": "Professional summary paragraph - keep this concise and high-level, do not repeat experience details",
+  "experiences": [
+    {{
+      "title": "Job Title (2-4 words max, professional title)",
+      "company": "Company Name",
+      "duration": "Start Date - End Date",
+      "description": "Detailed job description and achievements - be specific and avoid generic descriptions"
+    }}
+  ],
+  "educations": [
+    {{
+      "degree": "Degree/Certificate Name",
+      "institution": "School/University Name",
+      "year": "Graduation Year"
+    }}
+  ],
+  "skills": ["Skill 1", "Skill 2", "Skill 3"]
+}}
+
+Extract as much relevant information as possible. If information for a category is not available, use empty arrays or default values. Make the content professional and well-formatted. Create a compelling summary that highlights key qualifications without duplicating experience details."""
+
+        payload = {
+            "model": "meta/llama-3.1-8b-instruct",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.3,
+            "max_tokens": 1500,
+            "stream": False
+        }
+
+        headers = {
+            "Authorization": f"Bearer {NVIDIA_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(NVIDIA_API_URL, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        result = response.json()
+        parsed_data = json.loads(result["choices"][0]["message"]["content"].strip())
+
+        # Add suggestions for missing information
+        suggestions = analyze_missing_information(parsed_data)
+        parsed_data["suggestions"] = suggestions
+
+        return parsed_data
+
+    except Exception as e:
+        print(f"NVIDIA API error: {e}")
+        return parse_resume_fallback(request.raw_text)
+
+def analyze_missing_information(parsed_data: Dict) -> List[str]:
+    """Analyze parsed resume data and identify missing or incomplete information"""
+    suggestions = []
+
+    # Check personal info
+    personal = parsed_data.get("personal_info", {})
+    if not personal.get("name") or personal["name"] == "Your Name":
+        suggestions.append("Add your full name at the beginning of your resume text")
+    if not personal.get("email"):
+        suggestions.append("Include your email address for contact information")
+    if not personal.get("phone"):
+        suggestions.append("Add your phone number for easy contact")
+    if not personal.get("location"):
+        suggestions.append("Include your location (city, state/country)")
+
+    # Check summary
+    if not parsed_data.get("summary") or len(parsed_data["summary"]) < 50:
+        suggestions.append("Add a professional summary highlighting your key skills and experience")
+
+    # Check experiences
+    experiences = parsed_data.get("experiences", [])
+    if len(experiences) == 0:
+        suggestions.append("Describe your work experience, projects, or technical activities")
+    elif len(experiences) < 3:
+        suggestions.append("Consider adding more details about your professional experience")
+
+    # Check skills
+    skills = parsed_data.get("skills", [])
+    if len(skills) < 5:
+        suggestions.append("List more technical skills, tools, and technologies you work with")
+
+    # Check education
+    educations = parsed_data.get("educations", [])
+    if len(educations) == 0:
+        suggestions.append("Include your educational background and qualifications")
+
+    return suggestions
+
+def parse_resume_fallback(raw_text: str):
+    """Fallback parsing when AI is not available"""
+    import re
+    lines = raw_text.split('\n')
+    name = "Your Name"
+
+    # Extract name (first non-empty line that's likely a name, skip headers)
+    for line in lines[:10]:
+        line = line.strip()
+        if line and len(line.split()) >= 2 and len(line.split()) <= 4 and not any(char.isdigit() for char in line) and '@' not in line:
+            # Skip common headers
+            if not re.search(r'^(professional summary|summary|experience|education|skills|contact|about)', line, re.IGNORECASE):
+                words = line.split()
+                if all(word[0].isupper() for word in words if word):
+                    name = line
+                    break
+
+    # Extract email
+    email_match = re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', raw_text)
+    email = email_match.group(0) if email_match else ""
+
+    # Extract phone
+    phone_match = re.search(r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b', raw_text)
+    phone = phone_match.group(0) if phone_match else ""
+
+    # Extract location (simple pattern)
+    location_match = re.search(r'\b[A-Z][a-z]+,\s*[A-Z]{2}\b|\b[A-Z][a-z]+\s*,\s*[A-Z][a-z]+\b', raw_text)
+    location = location_match.group(0) if location_match else ""
+
+    # Extract skills (expanded keyword matching)
+    skills_keywords = [
+        "python", "java", "javascript", "react", "node.js", "sql", "machine learning", "nlp", "ai",
+        "html", "css", "typescript", "angular", "vue", "django", "flask", "fastapi", "tensorflow",
+        "pytorch", "pandas", "numpy", "scikit-learn", "docker", "kubernetes", "aws", "azure",
+        "git", "linux", "agile", "scrum", "devops", "ci/cd", "rest api", "graphql", "websockets",
+        "twilio", "sns", "iam", "github", "lstm", "ui/ux", "vector design", "real-time",
+        "communication", "leadership", "problem solving", "team work", "project management",
+        "backend development", "apis", "cloud infrastructure", "deployment pipelines"
+    ]
+    skills = [skill.title() for skill in skills_keywords if skill.lower() in raw_text.lower()]
+
+    # Extract summary section
+    summary = ""
+    summary_patterns = [
+        r'(?:professional summary|summary|about me|profile)(?:\s*:)?\s*\n?(.*?)(?:\n\n|\n(?:experience|education|skills|work|$))',
+        r'^([A-Z][^.!?]*?(?:technical lead|co-founder|engineer|developer|specialist|manager)[^.!?]*[.!?])',
+    ]
+
+    for pattern in summary_patterns:
+        summary_match = re.search(pattern, raw_text, re.IGNORECASE | re.DOTALL)
+        if summary_match:
+            extracted = summary_match.group(1).strip()
+            if len(extracted) > 50:  # Only use if substantial
+                summary = extracted[:500]  # Limit length
+                break
+
+    # If no summary found, create one from the first substantial paragraph
+    if not summary:
+        paragraphs = re.split(r'\n\s*\n', raw_text)
+        for para in paragraphs[:3]:
+            para = para.strip()
+            if len(para) > 100 and not re.search(r'^(experience|education|skills)', para, re.IGNORECASE):
+                summary = para[:500]
+                break
+
+    # Extract experience sections - improved parsing for complex descriptions
+    experiences = []
+
+    # First, try to extract from "such as:" sections
+    such_as_pattern = r'such as:\s*\n(.*?)(?:\nYou regularly|\n*$)'
+    such_as_match = re.search(such_as_pattern, raw_text, re.IGNORECASE | re.DOTALL)
+
+    if such_as_match:
+        such_as_text = such_as_match.group(1)
+        # Split by periods followed by newlines or just periods
+        items = re.split(r'\.\s*\n|\.\s*(?=[A-Z])|\.\s*$', such_as_text)
+        technical_items = [item.strip() for item in items if item.strip() and len(item.strip()) > 15]
+
+        for item in technical_items[:6]:  # Limit to 6 experiences
+            # Create meaningful titles and descriptions from the content
+            item_lower = item.lower()
+
+            # Extract key skills/areas from the description
+            if 'backend' in item_lower or 'apis' in item_lower or 'django' in item_lower:
+                title = "Backend Developer"
+                company = "Various Companies"
+            elif 'cloud' in item_lower or 'aws' in item_lower or 'twilio' in item_lower or 'sns' in item_lower:
+                title = "Cloud Engineer"
+                company = "Various Companies"
+            elif 'docker' in item_lower or 'github' in item_lower or 'deployment' in item_lower or 'pipelines' in item_lower:
+                title = "DevOps Engineer"
+                company = "Various Companies"
+            elif 'websocket' in item_lower or 'real-time' in item_lower or 'communication' in item_lower:
+                title = "Full Stack Developer"
+                company = "Various Companies"
+            elif 'secure' in item_lower or 'input-sanitization' in item_lower:
+                title = "Security Engineer"
+                company = "Various Companies"
+            elif 'ai' in item_lower or 'lstm' in item_lower or 'machine learning' in item_lower:
+                title = "AI Developer"
+                company = "Various Companies"
+            elif 'ui/ux' in item_lower or 'logo' in item_lower or 'design' in item_lower:
+                title = "UI/UX Designer"
+                company = "Various Companies"
+            elif 'research' in item_lower or 'hosting' in item_lower:
+                title = "Technical Researcher"
+                company = "Various Companies"
+            else:
+                title = "Technical Specialist"
+                company = "Various Companies"
+
+            experiences.append({
+                "title": title,
+                "company": company,
+                "duration": "Recent",
+                "description": item[:250] + ("..." if len(item) > 250 else "")
+            })
+
+    # If no experiences from "such as:" section, try to create from main description
+    if not experiences and len(raw_text) > 100:
+        # Look for main professional description
+        main_desc_match = re.search(r'(?:highly driven|experienced|skilled|strong expertise)(.*?)(?:you regularly|$)', raw_text, re.IGNORECASE | re.DOTALL)
+        if main_desc_match:
+            main_desc = main_desc_match.group(1).strip()
+            if len(main_desc) > 50:
+                # Extract a proper job title from the description
+                title_match = re.search(r'(?:as a|as an|working as|serving as)\s+([^,.]+)', main_desc, re.IGNORECASE)
+                if title_match:
+                    title = title_match.group(1).strip().title()
+                else:
+                    title = "Technical Professional"
+
+                experiences.append({
+                    "title": title,
+                    "company": "Professional Environment",
+                    "duration": "Recent",
+                    "description": main_desc[:300] + ("..." if len(main_desc) > 300 else "")
+                })
+
+    # If no technical items found, look for traditional experience sections
+    if not experiences:
+        exp_pattern = r'(?:experience|work|employment|projects)(?:\s*:)?\s*\n?(.*?)(?:\n\n|\n(?:education|skills|summary|$))'
+        exp_match = re.search(exp_pattern, raw_text, re.IGNORECASE | re.DOTALL)
+        if exp_match:
+            exp_text = exp_match.group(1)
+            # Split by bullet points or dashes
+            exp_lines = re.split(r'\n\s*[-•*]\s*', exp_text)
+            for line in exp_lines[:3]:
+                if line.strip() and len(line.strip()) > 20:
+                    clean_line = re.sub(r'^[-•*]\s*', '', line.strip())
+
+                    if ' at ' in clean_line.lower():
+                        parts = clean_line.lower().split(' at ', 1)
+                        title = parts[0].strip().title()
+                        company_part = parts[1]
+                        company_match = re.search(r'^([^\(\n,.]+)', company_part.strip())
+                        company = company_match.group(1).strip().title() if company_match else "Company"
+                    else:
+                        title = "Technical Experience"
+                        company = "Various Companies"
+
+                    duration_match = re.search(r'\((\d{4}(?:\s*-\s*(?:\d{4}|Present|present))?)\)', clean_line)
+                    duration = duration_match.group(1) if duration_match else "Recent"
+
+                    experiences.append({
+                        "title": title,
+                        "company": company,
+                        "duration": duration,
+                        "description": clean_line[:300]
+                    })
+
+    # If still no experiences but substantial content, create a general experience only if no other content was found
+    if not experiences and len(raw_text) > 200 and not summary:
+        experiences = [{
+            "title": "Technical Professional",
+            "company": "Various Organizations",
+            "duration": "Recent",
+            "description": "Experienced professional with strong technical background and expertise in multiple domains including development, infrastructure, and project management."
+        }]
+
+    # Extract education
+    educations = []
+    edu_pattern = r'(?:education|degree|academic)(?:\s*:)?\s*\n?(.*?)(?:\n\n|\n(?:experience|skills|summary|$))'
+    edu_match = re.search(edu_pattern, raw_text, re.IGNORECASE | re.DOTALL)
+    if edu_match:
+        edu_text = edu_match.group(1)
+        edu_lines = re.split(r'\n\s*[-•*]\s*', edu_text)
+        for line in edu_lines[:2]:
+            if line.strip():
+                educations.append({
+                    "degree": line.strip()[:100],
+                    "institution": "Educational Institution",
+                    "year": "Recent"
+                })
+
+    # If no summary extracted, generate one
+    if not summary:
+        summary = f"Professional with expertise in {', '.join(skills[:3]) if skills else 'various technical skills'}. Experienced in {len(experiences)} key areas."
+
+    # Analyze for missing information
+    parsed_data = {
+        "personal_info": {
+            "name": name,
+            "email": email,
+            "phone": phone,
+            "location": location
+        },
+        "summary": summary,
+        "experiences": experiences,
+        "educations": educations,
+        "skills": skills if skills else ["Communication", "Problem Solving", "Team Work"]
+    }
+
+    suggestions = analyze_missing_information(parsed_data)
+    parsed_data["suggestions"] = suggestions
+
+    return parsed_data
 
 @app.get("/")
 def read_root():
