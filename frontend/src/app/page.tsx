@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Upload, FileText, BarChart3, Users, Zap, Shield } from "lucide-react";
 import ResumeUploader from "../components/ResumeUploader";
 import Dashboard from "../components/Dashboard";
+import ResumeMakerForm from "../components/ResumeMakerForm";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"upload" | "dashboard">("upload");
+  const [activeTab, setActiveTab] = useState<"upload" | "dashboard" | "resume-maker">("upload");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -35,6 +36,16 @@ export default function Home() {
                 Screen Resume
               </button>
               <button
+                onClick={() => setActiveTab("resume-maker")}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeTab === "resume-maker"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                Resume Maker
+              </button>
+              <button
                 onClick={() => setActiveTab("dashboard")}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === "dashboard"
@@ -51,7 +62,13 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === "upload" ? <ResumeUploader /> : <Dashboard />}
+        {activeTab === "upload" ? (
+          <ResumeUploader />
+        ) : activeTab === "resume-maker" ? (
+          <ResumeMakerForm />
+        ) : (
+          <Dashboard />
+        )}
       </main>
 
       {/* Features Section */}
