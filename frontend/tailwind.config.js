@@ -7,6 +7,13 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'sans': ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        'serif': ['var(--font-playfair)', 'Georgia', 'serif'],
+        'slab': ['var(--font-roboto-slab)', 'Georgia', 'serif'],
+        'geist': ['var(--font-geist-sans)'],
+        'geist-mono': ['var(--font-geist-mono)'],
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':
