@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display, Roboto_Slab, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ChatAssistant from "../components/ChatAssistant";
+import Footer from "../components/Footer";
+import ScrollToTop from "../components/ScrollToTop";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -50,6 +52,8 @@ export default function RootLayout({
       >
         {children}
         <ChatAssistant />
+        <Footer />
+        <ScrollToTop />
       </body>
     </html>
   );

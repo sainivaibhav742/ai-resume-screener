@@ -517,15 +517,25 @@ export default function ResumeMakerForm() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
           {/* Input Section */}
           <div className="space-y-6">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Tell us about yourself</h3>
-              <textarea
-                value={rawText}
-                onChange={(e) => setRawText(e.target.value)}
-                placeholder="Paste your resume information, LinkedIn profile, or just tell us about your experience, education, skills, and career goals. For example:
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Tell us about yourself</h3>
+                  <p className="text-sm text-gray-600">Share your experience, education, and skills</p>
+                </div>
+              </div>
+
+              <div className="relative">
+                <textarea
+                  value={rawText}
+                  onChange={(e) => setRawText(e.target.value)}
+                  placeholder="Paste your resume information, LinkedIn profile, or just tell us about your experience, education, skills, and career goals. For example:
 
 John Doe
 Software Engineer with 5 years experience
@@ -534,44 +544,66 @@ Phone: (555) 123-4567
 
 Experience:
 - Senior Developer at Tech Corp (2020-Present)
-  Led development of key features, improved performance by 40%
+ Led development of key features, improved performance by 40%
 
 Education:
 - Bachelor's in Computer Science, University of Tech (2016-2020)
 
 Skills: JavaScript, React, Node.js, Python, AWS"
-                className="w-full h-96 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
-              />
+                  className="w-full h-80 p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 hover:border-blue-300"
+                />
+                <div className="absolute bottom-3 right-3 text-xs text-gray-400 bg-white px-2 py-1 rounded-md border">
+                  {rawText.length} characters
+                </div>
+              </div>
+
+              <div className="mt-4 text-xs text-gray-500 space-y-1">
+                <p>• Include your contact information, work experience, education, and skills</p>
+                <p>• The more details you provide, the better your resume will be</p>
+              </div>
             </div>
 
-            <button
-              onClick={parseResumeWithAI}
-              disabled={isProcessing || !rawText.trim()}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center space-x-2"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Creating Your Resume...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-5 w-5" />
-                  <span>Generate Resume with AI</span>
-                </>
+            <div className="space-y-3">
+              <button
+                onClick={parseResumeWithAI}
+                disabled={isProcessing || !rawText.trim()}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>Creating Your Resume...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-5 w-5" />
+                    <span>Generate Resume with AI</span>
+                  </>
+                )}
+              </button>
+
+              {!rawText.trim() && (
+                <p className="text-sm text-gray-500 text-center animate-pulse">
+                  Enter some information above to get started
+                </p>
               )}
-            </button>
+            </div>
           </div>
 
           {/* Preview Section */}
-          <div className="lg:sticky lg:top-8">
-            <div className="bg-gray-50 rounded-lg p-6 border-2 border-dashed border-gray-300">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-gray-900">Resume Preview</h3>
+          <div className="xl:sticky xl:top-8">
+            <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6 border-2 border-dashed border-gray-300 hover:border-blue-300 transition-all duration-300">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <FileText className="h-4 w-4 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Resume Preview</h3>
+                </div>
                 {parsedData && (
                   <button
                     onClick={downloadResume}
-                    className="bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center space-x-2"
+                    className="bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2.5 px-5 rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center space-x-2 shadow-md hover:shadow-lg transform hover:scale-105"
                   >
                     <Download className="h-4 w-4" />
                     <span>Download PDF</span>
@@ -583,19 +615,24 @@ Skills: JavaScript, React, Node.js, Python, AWS"
                 {parsedData ? (
                   <>
                     {suggestions.length > 0 && (
-                      <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
+                      <div className="mb-6 p-5 bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-500 rounded-r-xl shadow-sm">
                         <div className="flex items-start">
                           <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                            </svg>
+                            <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+                              <svg className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                            </div>
                           </div>
-                          <div className="ml-3">
-                            <h3 className="text-sm font-medium text-yellow-800">Suggestions to improve your resume:</h3>
-                            <div className="mt-2 text-sm text-yellow-700">
-                              <ul className="list-disc pl-5 space-y-1">
+                          <div className="ml-4">
+                            <h3 className="text-lg font-semibold text-amber-900 mb-2">Resume Improvement Suggestions</h3>
+                            <div className="text-sm text-amber-800">
+                              <ul className="space-y-2">
                                 {suggestions.map((suggestion, index) => (
-                                  <li key={index}>{suggestion}</li>
+                                  <li key={index} className="flex items-start">
+                                    <span className="w-2 h-2 bg-amber-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                    <span>{suggestion}</span>
+                                  </li>
                                 ))}
                               </ul>
                             </div>
@@ -605,111 +642,114 @@ Skills: JavaScript, React, Node.js, Python, AWS"
                     )}
 
                     {showQuestions && (
-                      <div className="mb-6 p-6 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
+                      <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-r-xl shadow-sm">
                         <div className="flex items-start">
                           <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                            </svg>
+                            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                              <svg className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                              </svg>
+                            </div>
                           </div>
-                          <div className="ml-3 flex-1">
-                            <h3 className="text-sm font-medium text-blue-800 mb-3">Please provide additional information to complete your resume:</h3>
-                            <div className="space-y-4">
+                          <div className="ml-4 flex-1">
+                            <h3 className="text-lg font-semibold text-blue-900 mb-4">Complete Your Resume</h3>
+                            <p className="text-sm text-blue-700 mb-4">Help us create a more complete resume by providing the missing information below:</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               {(!parsedData?.personal_info?.name || parsedData.personal_info.name === "Your Name") && (
-                                <div>
-                                  <label className="block text-sm font-medium text-blue-700 mb-1">Full Name</label>
+                                <div className="md:col-span-2">
+                                  <label className="block text-sm font-medium text-blue-800 mb-2">Full Name</label>
                                   <input
                                     type="text"
                                     value={additionalInfo.name}
                                     onChange={(e) => setAdditionalInfo({...additionalInfo, name: e.target.value})}
-                                    className="w-full px-3 py-2 border border-blue-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
                                     placeholder="Enter your full name"
                                   />
                                 </div>
                               )}
                               {!parsedData?.personal_info?.email && (
                                 <div>
-                                  <label className="block text-sm font-medium text-blue-700 mb-1">Email Address</label>
+                                  <label className="block text-sm font-medium text-blue-800 mb-2">Email Address</label>
                                   <input
                                     type="email"
                                     value={additionalInfo.email}
                                     onChange={(e) => setAdditionalInfo({...additionalInfo, email: e.target.value})}
-                                    className="w-full px-3 py-2 border border-blue-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
                                     placeholder="your.email@example.com"
                                   />
                                 </div>
                               )}
                               {!parsedData?.personal_info?.phone && (
                                 <div>
-                                  <label className="block text-sm font-medium text-blue-700 mb-1">Phone Number</label>
+                                  <label className="block text-sm font-medium text-blue-800 mb-2">Phone Number</label>
                                   <input
                                     type="tel"
                                     value={additionalInfo.phone}
                                     onChange={(e) => setAdditionalInfo({...additionalInfo, phone: e.target.value})}
-                                    className="w-full px-3 py-2 border border-blue-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
                                     placeholder="(555) 123-4567"
                                   />
                                 </div>
                               )}
                               {!parsedData?.personal_info?.location && (
-                                <div>
-                                  <label className="block text-sm font-medium text-blue-700 mb-1">Location</label>
+                                <div className="md:col-span-2">
+                                  <label className="block text-sm font-medium text-blue-800 mb-2">Location</label>
                                   <input
                                     type="text"
                                     value={additionalInfo.location}
                                     onChange={(e) => setAdditionalInfo({...additionalInfo, location: e.target.value})}
-                                    className="w-full px-3 py-2 border border-blue-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
                                     placeholder="City, State/Country"
                                   />
                                 </div>
                               )}
                               {(!parsedData?.summary || parsedData.summary.length < 50) && (
-                                <div>
-                                  <label className="block text-sm font-medium text-blue-700 mb-1">Professional Summary</label>
+                                <div className="md:col-span-2">
+                                  <label className="block text-sm font-medium text-blue-800 mb-2">Professional Summary</label>
                                   <textarea
                                     value={additionalInfo.summary}
                                     onChange={(e) => setAdditionalInfo({...additionalInfo, summary: e.target.value})}
-                                    className="w-full px-3 py-2 border border-blue-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white resize-none"
                                     rows={3}
                                     placeholder="Brief professional summary highlighting your key skills and experience"
                                   />
                                 </div>
                               )}
                               {(!parsedData?.educations || parsedData.educations.length === 0) && (
-                                <div>
-                                  <label className="block text-sm font-medium text-blue-700 mb-1">Education</label>
+                                <div className="md:col-span-2">
+                                  <label className="block text-sm font-medium text-blue-800 mb-2">Education</label>
                                   <input
                                     type="text"
                                     value={additionalInfo.education}
                                     onChange={(e) => setAdditionalInfo({...additionalInfo, education: e.target.value})}
-                                    className="w-full px-3 py-2 border border-blue-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
                                     placeholder="Degree and field of study"
                                   />
                                 </div>
                               )}
                               {(!parsedData?.experiences || parsedData.experiences.length < 2) && (
-                                <div>
-                                  <label className="block text-sm font-medium text-blue-700 mb-1">Additional Experience</label>
+                                <div className="md:col-span-2">
+                                  <label className="block text-sm font-medium text-blue-800 mb-2">Additional Experience</label>
                                   <textarea
                                     value={additionalInfo.experience}
                                     onChange={(e) => setAdditionalInfo({...additionalInfo, experience: e.target.value})}
-                                    className="w-full px-3 py-2 border border-blue-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white resize-none"
                                     rows={3}
                                     placeholder="Describe additional work experience, projects, or achievements"
                                   />
                                 </div>
                               )}
                             </div>
-                            <div className="mt-4 flex justify-end space-x-3">
+                            <div className="mt-6 flex justify-end space-x-3">
                               <button
                                 onClick={() => setShowQuestions(false)}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                                className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200"
                               >
                                 Skip for Now
                               </button>
                               <button
                                 onClick={updateWithAdditionalInfo}
-                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
+                                className="px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg"
                               >
                                 Update Resume
                               </button>
