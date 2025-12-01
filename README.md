@@ -101,132 +101,196 @@ This isn't just a resume screener or resume builder - it's a **complete hiring e
 
 ```
 ai-resume-screener/
-├── backend/                    # FastAPI backend
-│   ├── main.py                # Main API application
-│   └── tests/                 # Unit tests
+├── venv/                      # Virtual environment (create this)
+├── backend/                   # FastAPI backend
+│   ├── main.py               # Main API application (port 8000)
+│   ├── init_db.py            # Database initialization script
+│   ├── database.py           # Database configuration
+│   ├── models.py             # SQLAlchemy models (18 tables)
+│   ├── schemas.py            # Pydantic schemas
+│   ├── auth.py               # JWT authentication
+│   ├── ai_resume_screener.db # SQLite database
+│   ├── routers/              # API route modules
+│   │   ├── auth_routes.py
+│   │   ├── candidate_routes.py
+│   │   └── recruiter_routes.py
+│   └── tests/                # Unit tests
 │       └── test_main.py
-├── frontend/                  # Next.js frontend
+├── frontend/                 # Next.js 16 frontend
 │   ├── src/
-│   │   ├── app/              # Next.js app router
-│   │   │   ├── layout.tsx    # Root layout with chat assistant
-│   │   │   ├── page.tsx      # Landing page
-│   │   │   └── job-posting/  # Job posting form
+│   │   ├── app/             # Next.js app router
+│   │   │   ├── layout.tsx   # Root layout with Footer
+│   │   │   ├── page.tsx     # Homepage (warm theme)
+│   │   │   ├── candidate/   # Candidate portal
+│   │   │   │   └── page.tsx
+│   │   │   └── recruiter/   # Recruiter portal
 │   │   │       └── page.tsx
-│   │   └── components/       # React components
+│   │   └── components/      # React components
 │   │       ├── ResumeUploader.tsx
-│   │       ├── Dashboard.tsx
-│   │       ├── JobPostingForm.tsx
-│   │       └── ChatAssistant.tsx
+│   │       ├── ResumeMakerForm.tsx
+│   │       ├── Footer.tsx   # Modern footer
+│   │       ├── ChatAssistant.tsx
+│   │       ├── ThemeToggle.tsx
+│   │       └── ScrollToTop.tsx
 │   ├── package.json
-│   └── tailwind.config.js
-├── ml/                       # Machine learning models
-│   ├── job_predictor.py     # Job role classification
-│   ├── train_models.py      # Model training scripts
+│   └── tailwind.config.js   # Warm color theme config
+├── ml/                      # Machine learning models
+│   ├── job_predictor.py    # Job role classification
+│   ├── train_models.py     # Model training scripts
 │   └── job_predictor_model.pkl # Trained model
-├── docs/                    # Documentation
-├── test_resume.pdf         # Sample resume for testing
-├── README.md               # This file
-├── TODO.md                 # Development roadmap
-└── requirements.txt       # Python dependencies
+├── .env                     # Environment variables (optional)
+├── .env.example             # Environment template
+├── ARCHITECTURE.md          # System architecture docs
+├── plan.md                  # Implementation plan
+├── todo.md                  # Detailed TODO list
+├── README.md                # This file
+└── requirements.txt         # Python dependencies
 ```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- **Python 3.8+** with pip
+- **Python 3.9+** (Recommended: Python 3.13.9)
 - **Node.js 18+** with npm
 - **Git** for version control
-- **NVIDIA API Key** (get from [NVIDIA NGC](https://ngc.nvidia.com/))
 
-### Installation & Setup
+### 📦 Installation & Setup
 
-#### 1. Clone the Repository
+Follow these steps carefully to run the project in a virtual environment:
+
+#### Step 1: Clone the Repository
 ```bash
 git clone https://github.com/sainivaibhav742/ai-resume-screener.git
 cd ai-resume-screener
 ```
 
-#### 2. Backend Setup
+#### Step 2: Backend Setup with Virtual Environment
 
 ```bash
-# Navigate to backend directory
-cd backend
-
-# Create virtual environment
+# Create a virtual environment in the project root
 python -m venv venv
 
-# Activate virtual environment
-# On Windows:
-venv\Scripts\activate
+# Activate the virtual environment
+# On Windows (PowerShell):
+.\venv\Scripts\Activate.ps1
+# On Windows (CMD):
+venv\Scripts\activate.bat
 # On macOS/Linux:
 source venv/bin/activate
 
-# Install Python dependencies
-pip install -r ../requirements.txt
+# Install all Python dependencies
+pip install -r requirements.txt
 
-# Download spaCy language model
+# Install additional required packages
+pip install email-validator
+
+# Download spaCy language model (if needed)
 python -m spacy download en_core_web_sm
-
-# Set NVIDIA API key (create .env file in project root)
-# Copy the provided .env file and update with your NVIDIA API key
-# Get your key from: https://ngc.nvidia.com/setup/api-key
 ```
 
-#### 3. Machine Learning Model Setup
+#### Step 3: Initialize the Database
 
 ```bash
-# Navigate to ml directory
-cd ../ml
+# Navigate to backend directory (keep venv activated)
+cd backend
 
-# Train the job prediction model (optional - pre-trained model included)
-python train_models.py
+# Initialize the database with all tables
+python init_db.py
+
+# The database file will be created at: backend/ai_resume_screener.db
 ```
 
-#### 4. Frontend Setup
+#### Step 4: Start the Backend Server
 
 ```bash
-# Open new terminal and navigate to frontend directory
-cd ../frontend
+# Make sure you're in the backend directory with venv activated
+python main.py
+
+# Backend will start on: http://localhost:8000
+# API Documentation: http://localhost:8000/docs
+```
+
+#### Step 5: Frontend Setup (New Terminal)
+
+```bash
+# Open a NEW terminal window
+# Navigate to frontend directory
+cd ai-resume-screener/frontend
 
 # Install Node.js dependencies
 npm install
 
-# Start development server
+# Start the development server
 npm run dev
+
+# Frontend will start on: http://localhost:3000
 ```
 
-#### 5. Start Backend Server
+### ✅ Running the Application
+
+### 🔧 Troubleshooting
+
+#### Virtual Environment Issues
+```bash
+# If virtual environment doesn't activate on Windows:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# Then try activating again:
+.\venv\Scripts\Activate.ps1
+
+# Verify activation (you should see (venv) in your prompt)
+```
+
+#### Backend Issues
+- **"Module not found" errors**: 
+  ```bash
+  # Ensure venv is activated and reinstall
+  pip install -r requirements.txt
+  pip install email-validator
+  ```
+- **Port 8000 already in use**:
+  ```bash
+  # Kill the process using the port
+  # Windows:
+  netstat -ano | findstr :8000
+  taskkill /PID <PID> /F
+  ```
+- **Database errors**: Delete `backend/ai_resume_screener.db` and run `python init_db.py` again
+
+#### Frontend Issues
+- **Port 3000 conflict**: Next.js will automatically try port 3001, 3002, etc.
+- **Build errors**: 
+### 🔧 Configuration
+
+#### Environment Variables (Optional)
+
+Create a `.env` file in the project root if you need custom configuration:
+
+```env
+# Database Configuration (default: SQLite)
+DATABASE_URL=sqlite:///./ai_resume_screener.db
+
+# Server Configuration
+HOST=127.0.0.1
+PORT=8000
+
+# JWT Secret (for production)
+SECRET_KEY=your-secret-key-here
+
+# API Keys (if using external services)
+NVIDIA_API_KEY=your_nvidia_api_key_here
+```
+
+#### Model Training (Optional)
+
+The project includes pre-trained models. To retrain:
 
 ```bash
-# In backend terminal (with virtual environment activated)
-cd ../backend
-python main.py
-```
-
-### Running the Application
-
-Once all components are set up:
-
-1. **Backend API** will be running on `http://127.0.0.1:8001`
-2. **Frontend Application** will be running on `http://localhost:3000`
-3. **API Documentation** available at `http://127.0.0.1:8001/docs`
-
-### Testing the Setup
-
-1. Open `http://localhost:3000` in your browser
-2. Upload the provided `test_resume.pdf` file
-3. Enter a sample job description (e.g., "Software Engineer with Python experience")
-4. Click "Analyze with AI" to test the resume screening functionality
-5. Try the AI Chat Assistant in the bottom-right corner
-6. Check the Dashboard for analytics
-
-### Troubleshooting
-
-- **Backend won't start**: Ensure virtual environment is activated and all dependencies are installed
-- **Frontend won't load**: Check that `npm install` completed successfully and no port conflicts
-- **API calls fail**: Verify NVIDIA API key is set correctly in `.env` file
-- **Model loading errors**: Ensure the ML model files are present in the `ml/` directory
+# With venv activated
+cd ml
+python train_models.py
+```*Model loading errors**: Ensure the ML model files are present in the `ml/` directory
 
 ### 🔧 Configuration
 
