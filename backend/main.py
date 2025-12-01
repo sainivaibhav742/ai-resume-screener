@@ -1185,8 +1185,84 @@ def parse_resume_fallback(raw_text: str):
 def read_root():
     return {"message": "AI Resume Screener API"}
 
+@app.get("/dashboard-stats")
+def get_dashboard_stats():
+    """Get dashboard statistics"""
+    return {
+        "totalResumes": 65,
+        "averageScore": 76.5,
+        "topSkills": [
+            {"skill": "Python", "count": 45},
+            {"skill": "JavaScript", "count": 38},
+            {"skill": "React", "count": 32},
+            {"skill": "SQL", "count": 28},
+            {"skill": "AWS", "count": 25}
+        ],
+        "roleDistribution": [
+            {"role": "Software Engineer", "count": 25},
+            {"role": "Data Scientist", "count": 18},
+            {"role": "Product Manager", "count": 12},
+            {"role": "DevOps Engineer", "count": 10}
+        ],
+        "weeklyActivity": [
+            {"week": "Week 1", "count": 12},
+            {"week": "Week 2", "count": 18},
+            {"week": "Week 3", "count": 15},
+            {"week": "Week 4", "count": 20}
+        ],
+        "scoreDistribution": [
+            {"range": "90-100", "count": 8},
+            {"range": "80-89", "count": 15},
+            {"range": "70-79", "count": 20},
+            {"range": "60-69", "count": 12},
+            {"range": "50-59", "count": 8},
+            {"range": "0-49", "count": 2}
+        ]
+    }
+
+@app.get("/screening-results")
+def get_screening_results():
+    """Get recent screening results"""
+    return {
+        "screening_results": [
+            {
+                "id": "1",
+                "candidate_name": "John Developer",
+                "job_id": None,
+                "fit_score": 92,
+                "predicted_role": "Senior Software Engineer",
+                "skills": ["Python", "React", "AWS", "Docker"],
+                "experience_years": 5,
+                "timestamp": datetime.now().isoformat(),
+                "recommendation": "Strong Match"
+            },
+            {
+                "id": "2",
+                "candidate_name": "Sarah Data",
+                "job_id": None,
+                "fit_score": 87,
+                "predicted_role": "Data Scientist",
+                "skills": ["Python", "Machine Learning", "SQL", "Pandas"],
+                "experience_years": 4,
+                "timestamp": datetime.now().isoformat(),
+                "recommendation": "Strong Match"
+            },
+            {
+                "id": "3",
+                "candidate_name": "Mike Frontend",
+                "job_id": None,
+                "fit_score": 78,
+                "predicted_role": "Frontend Developer",
+                "skills": ["JavaScript", "React", "CSS", "TypeScript"],
+                "experience_years": 3,
+                "timestamp": datetime.now().isoformat(),
+                "recommendation": "Good Match"
+            }
+        ]
+    }
+
 if __name__ == "__main__":
     import uvicorn
     import sys
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8001
-    uvicorn.run(app, host="127.0.0.1", port=port)
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
+    uvicorn.run(app, host="0.0.0.0", port=port)

@@ -59,8 +59,8 @@ export default function Dashboard() {
     const fetchData = async () => {
       try {
         const [statsResponse, resultsResponse] = await Promise.all([
-          fetch("http://127.0.0.1:8001/dashboard-stats"),
-          fetch("http://127.0.0.1:8001/screening-results")
+          fetch("http://localhost:8000/dashboard-stats"),
+          fetch("http://localhost:8000/screening-results")
         ]);
 
         const statsData = await statsResponse.json();
@@ -103,7 +103,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-400"></div>
       </div>
     );
   }
@@ -116,8 +116,8 @@ export default function Dashboard() {
       label: 'Count',
       data: stats.topSkills?.map(item => item.count) || [],
       backgroundColor: [
-        'rgba(59, 130, 246, 0.8)',
-        'rgba(147, 51, 234, 0.8)',
+        'rgba(251, 113, 133, 0.8)',
+        'rgba(244, 114, 182, 0.8)',
         'rgba(16, 185, 129, 0.8)',
         'rgba(245, 158, 11, 0.8)',
         'rgba(239, 68, 68, 0.8)',

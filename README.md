@@ -1,50 +1,93 @@
-# 🤖 AI Resume Screener
+# 🚀 AI Resume Screener - Smart Hiring OS
 
-An advanced AI-powered resume screening platform that leverages cutting-edge NLP and machine learning to revolutionize HR recruitment processes. Built with NVIDIA AI integration for intelligent analysis and automated candidate evaluation.
+A comprehensive dual-sided AI-powered platform that serves both candidates and recruiters. Revolutionize hiring with intelligent resume building, advanced screening, and seamless job matching.
+
+## 🌟 What Makes This Different?
+
+This isn't just a resume screener or resume builder - it's a **complete hiring ecosystem** that bridges candidates and recruiters through unified AI intelligence.
+
+### 🎯 The Innovation
+
+- **Dual-Sided Platform**: Separate portals for candidates and recruiters, working in harmony
+- **Unified AI Profile Format**: Standardized resume data that eliminates format chaos
+- **Bidirectional Matching**: AI matches candidates to jobs AND jobs to candidates
+- **Continuous Improvement**: Dynamic profiles that evolve, not static PDFs
+- **Network Effects**: Better candidates → Better for recruiters → More jobs → Better for candidates
+
+## 🎭 Two Portals, One Intelligence
+
+### 👤 Candidate Portal - Build Your Career
+
+**For Job Seekers**: Create, optimize, and get matched with perfect opportunities
+
+#### Features
+- **AI Resume Builder**: Create professional, ATS-optimized resumes with multiple templates
+- **Smart Resume Scoring**: Get instant feedback and improvement suggestions
+- **Skill Gap Analysis**: Discover what skills you need for your dream job
+- **Job Matching Engine**: Find jobs that match your profile (with % compatibility)
+- **Application Tracking**: Manage all your applications in one place
+- **Cover Letter Generator**: AI-powered personalized cover letters
+- **Progress Tracker**: See your profile improvement over time
+- **ATS Optimization**: Ensure your resume passes automated screening systems
+
+### 🏢 Recruiter Portal - Hire Smarter
+
+**For Companies**: Screen, rank, and hire the best candidates faster
+
+#### Features
+- **Bulk Resume Screening**: Upload and analyze hundreds of resumes instantly
+- **AI Candidate Ranking**: Automatic ranking by job fit with detailed breakdowns
+- **Job Posting Management**: Create and manage all your job openings
+- **Red Flag Detection**: Identify employment gaps, inconsistencies, and concerns
+- **Format Normalization**: Convert any resume format to standardized data
+- **Team Collaboration**: Work with your hiring team, add notes and feedback
+- **Advanced Analytics**: Track hiring metrics, conversion rates, and time-to-hire
+- **Candidate Pipeline**: Manage candidates through your hiring workflow
 
 ## ✨ Key Features
 
-### 🔍 Advanced Resume Analysis
-- **Multi-format Support**: Parse resumes from PDF, DOCX, and text files
-- **Intelligent Parsing**: Extract structured data including name, skills, experience, and education
-- **AI-Powered Summarization**: NVIDIA Llama 3.1 generates concise, professional resume summaries
+### 🤖 AI-Powered Intelligence
+- **NVIDIA AI Integration**: Advanced NLP for content generation and optimization
+- **Semantic Matching**: Goes beyond keywords to understand context and meaning
+- **Job Role Prediction**: Automatically classify candidates by best-fit roles
+- **Skill Extraction**: Intelligently identify technical and soft skills
+- **Experience Analysis**: Calculate years of experience and relevance
 
-### 🎯 Smart Job Matching
-- **Semantic Similarity**: Advanced NLP matching beyond simple keyword searches
-- **Skill Gap Analysis**: Identify missing competencies and provide development recommendations
-- **Fit Score Calculation**: Comprehensive scoring algorithm combining multiple factors
+### 📊 Smart Analytics
+- **Match Scores**: Detailed breakdown of candidate-job compatibility
+- **Skill Gap Reports**: See what's missing and get learning recommendations
+- **Red Flag Alerts**: Automated detection of resume inconsistencies
+- **Trend Analysis**: Track hiring trends and candidate quality over time
+- **Success Metrics**: Measure hiring effectiveness and ROI
 
-### 📊 HR Dashboard & Analytics
-- **Real-time Analytics**: Track screening activities and performance metrics
-- **Candidate Ranking**: Automated ranking system with detailed reports
-- **Job Posting Management**: Create and manage job descriptions with ease
+### 🛡️ Enterprise-Ready
+- **Role-Based Access**: Separate permissions for candidates, recruiters, and admins
+- **JWT Authentication**: Secure token-based authentication
+- **GDPR Compliant**: Privacy-first data handling
+- **Team Management**: Invite team members with custom permissions
+- **Subscription Plans**: Flexible pricing for different business sizes
 
-### 🛡️ Compliance & Security
-- **GDPR Compliant**: Privacy-first data handling with data anonymization
-- **Bias Detection**: Automated identification of potentially biased language
-- **Secure Storage**: Encrypted data storage with configurable retention policies
-
-### 🤖 AI Assistant
-- **NVIDIA-Powered Chatbot**: Interactive HR assistant for guidance and best practices
-- **Contextual Help**: Real-time assistance with resume screening and recruitment questions
-- **Intelligent Recommendations**: AI-driven suggestions for hiring decisions
-
-### ⚡ Performance Features
-- **ATS Optimization Check**: Ensure resume compatibility with Applicant Tracking Systems
-- **Language & Tone Analysis**: Evaluate communication style and professionalism
-- **Bulk Processing Ready**: Framework for processing multiple resumes simultaneously
+### 🎯 Advanced Matching
+- **Multi-Factor Scoring**: Skills, experience, education, location, and more
+- **Explainable AI**: Understand why candidates match (or don't)
+- **Bidirectional Discovery**: Candidates find jobs, recruiters find candidates
+- **Real-Time Updates**: Matches improve as profiles are updated
 
 ## 🛠️ Technology Stack
 
 ### Backend
-- **Framework**: FastAPI (Python 3.8+)
-- **AI/ML**: NVIDIA API (Llama 3.1 8B), spaCy, SentenceTransformers, scikit-learn
-- **Data Processing**: PyMuPDF, pdfminer.six
-- **Database**: In-memory storage (production-ready for PostgreSQL/SQLAlchemy)
+- **Framework**: FastAPI (Python 3.9+)
+- **Database**: SQLAlchemy ORM with PostgreSQL/SQLite
+- **Authentication**: JWT with bcrypt password hashing
+- **AI/ML**: NVIDIA API, spaCy, SentenceTransformers, scikit-learn
+- **APIs**: RESTful architecture with OpenAPI documentation
 
 ### Frontend
-- **Framework**: Next.js 14 (React 18)
+- **Framework**: Next.js 14 (React 19)
+- **Language**: TypeScript
 - **Styling**: Tailwind CSS
+- **State Management**: React Context API
+- **API Client**: Axios with interceptors
 - **Charts**: Chart.js with react-chartjs-2
 - **Icons**: Lucide React
 
