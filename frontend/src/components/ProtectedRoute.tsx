@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requireRole?: "candidate" | "recruiter";
+  requireRole?: "candidate" | "recruiter" | "admin";
 }
 
 /**
@@ -23,19 +23,29 @@ export default function ProtectedRoute({
 
   useEffect(() => {
     if (!loading) {
-      // Not authenticated - redirect to login
+      // Not authenticated - redirect to appropriate login page
       if (!user) {
-        router.push("/login");
+        if (requireRole === "admin") {
+          router.push("/admin-login");
+        } else if (requireRole === "recruiter") {
+          router.push("/recruiter-login");
+        } else if (requireRole === "candidate") {
+          router.push("/candidate-login");
+        } else {
+          router.push("/candidate-login"); // Default to candidate login
+        }
         return;
       }
 
-      // Check role if required
-      if (requireRole && user.role !== requireRole) {
+      // Check role if required (admin can access all portals)
+      if (requireRole && user.role !== requireRole && user.role !== "admin") {
         // Redirect to correct dashboard based on actual role
         if (user.role === "candidate") {
-          router.push("/candidate");
+          router.push("/candidate/dashboard");
         } else if (user.role === "recruiter") {
-          router.push("/recruiter");
+          router.push("/recruiter/dashboard");
+        } else if (user.role === "admin") {
+          router.push("/admin/dashboard");
         }
       }
     }
@@ -58,8 +68,8 @@ export default function ProtectedRoute({
     return null;
   }
 
-  // Wrong role - don't render protected content
-  if (requireRole && user.role !== requireRole) {
+  // Wrong role - don't render protected content (admin can access all)
+  if (requireRole && user.role !== requireRole && (user.role as string) !== "admin") {
     return null;
   }
 

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 interface User {
   id: number;
   email: string;
-  role: "candidate" | "recruiter";
+  role: "candidate" | "recruiter" | "admin";
   full_name?: string;
   company_name?: string;
 }
@@ -87,9 +87,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Redirect based on role
       if (data.user.role === "candidate") {
-        router.push("/candidate");
+        router.push("/candidate/dashboard");
       } else if (data.user.role === "recruiter") {
-        router.push("/recruiter");
+        router.push("/recruiter/dashboard");
+      } else if (data.user.role === "admin") {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -143,9 +147,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Redirect based on role
       if (data.user.role === "candidate") {
-        router.push("/candidate");
+        router.push("/candidate/dashboard");
       } else if (data.user.role === "recruiter") {
-        router.push("/recruiter");
+        router.push("/recruiter/dashboard");
+      } else if (data.user.role === "admin") {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/");
       }
     } catch (error) {
       console.error("Registration error:", error);

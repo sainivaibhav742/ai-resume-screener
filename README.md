@@ -14,7 +14,7 @@ This isn't just a resume screener or resume builder - it's a **complete hiring e
 - **Continuous Improvement**: Dynamic profiles that evolve, not static PDFs
 - **Network Effects**: Better candidates → Better for recruiters → More jobs → Better for candidates
 
-## 🎭 Two Portals, One Intelligence
+## 🎭 Three Portals, One Intelligence
 
 ### 👤 Candidate Portal - Build Your Career
 
@@ -30,6 +30,8 @@ This isn't just a resume screener or resume builder - it's a **complete hiring e
 - **Progress Tracker**: See your profile improvement over time
 - **ATS Optimization**: Ensure your resume passes automated screening systems
 
+**Access**: Blue-themed login at `/candidate-login`
+
 ### 🏢 Recruiter Portal - Hire Smarter
 
 **For Companies**: Screen, rank, and hire the best candidates faster
@@ -43,6 +45,22 @@ This isn't just a resume screener or resume builder - it's a **complete hiring e
 - **Team Collaboration**: Work with your hiring team, add notes and feedback
 - **Advanced Analytics**: Track hiring metrics, conversion rates, and time-to-hire
 - **Candidate Pipeline**: Manage candidates through your hiring workflow
+
+**Access**: Emerald-themed login at `/recruiter-login`
+
+### 🛡️ Admin Portal - Platform Management
+
+**For Administrators**: Oversee platform operations and system health
+
+#### Features
+- **User Management**: View and manage all candidate and recruiter accounts
+- **System Monitoring**: Real-time platform health and performance metrics
+- **Analytics Dashboard**: Platform-wide statistics and insights
+- **Multi-Portal Access**: Switch between candidate and recruiter views
+- **Database Operations**: Direct access to system data and configurations
+- **Security Controls**: Manage authentication and access permissions
+
+**Access**: Dark-themed secure login at `/admin-login` (restricted access)
 
 ## ✨ Key Features
 
@@ -373,6 +391,50 @@ python train_models.py
 
 ## 🎮 Usage Guide
 
+### Test Accounts
+
+The system includes three pre-configured test accounts for exploring different user roles:
+
+```
+📧 Candidate Account
+Email: candidate@gmail.com
+Password: 1234
+Access: /candidate-login → Blue-themed portal
+
+📧 Recruiter Account
+Email: recruiter@gmail.com
+Password: 1234
+Access: /recruiter-login → Emerald-themed portal
+
+📧 Admin Account
+Email: admin@gmail.com
+Password: 1234
+Access: /admin-login → Dark-themed secure portal
+```
+
+### Portal Navigation
+
+#### Candidate Portal
+1. **Login**: Navigate to `http://localhost:3000` → Click "Candidate Login"
+2. **Build Resume**: Use AI-powered resume builder with templates
+3. **Browse Jobs**: View job postings and match scores
+4. **Track Applications**: Monitor your application status
+5. **Profile Management**: Update skills, experience, and preferences
+
+#### Recruiter Portal
+1. **Login**: Navigate to `http://localhost:3000` → Click "Recruiter Login"
+2. **Post Jobs**: Create job openings with detailed requirements
+3. **Screen Resumes**: Upload and analyze candidate resumes in bulk
+4. **Rank Candidates**: View AI-powered candidate rankings
+5. **Manage Pipeline**: Track candidates through hiring stages
+
+#### Admin Portal
+1. **Login**: Direct access at `/admin-login` or via footer link
+2. **User Management**: View all candidates, recruiters, and system users
+3. **System Health**: Monitor platform performance and statistics
+4. **Multi-Portal Access**: Switch between candidate/recruiter views
+5. **Analytics**: Platform-wide insights and metrics
+
 ### Basic Resume Screening
 
 1. **Access the Application**: Open `http://localhost:3000` in your browser
@@ -514,18 +576,30 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
 - **Concurrent Users**: Supports multiple simultaneous screenings
 
 ### Known Limitations
-- In-memory data storage (resets on server restart)
 - NVIDIA API rate limits apply
 - Large PDF files may take longer to process
 - Model accuracy depends on training data quality
 
 ## 🔒 Security & Privacy
 
+### Authentication System
+- **JWT Tokens**: Secure token-based authentication with 30-minute expiration
+- **bcrypt Hashing**: Industry-standard password encryption
+- **Role-Based Access**: Three distinct user roles (Candidate, Recruiter, Admin)
+- **Protected Routes**: Frontend route guards prevent unauthorized access
+- **Session Management**: Secure token storage in localStorage with auto-cleanup
+
 ### Data Protection
 - **Anonymization**: Personal data is hashed and anonymized
-- **Encryption**: Sensitive data encrypted at rest
+- **Encryption**: Passwords encrypted with bcrypt using strong salt
 - **Retention**: Configurable data retention policies
-- **Access Control**: API endpoints secured with proper validation
+- **Access Control**: API endpoints secured with JWT validation
+- **Database Security**: SQLite with proper user permissions
+
+### User Roles & Permissions
+- **Candidate**: Resume building, job browsing, application tracking
+- **Recruiter**: Job posting, resume screening, candidate management
+- **Admin**: Full system access, user management, multi-portal switching
 
 ### Compliance
 - **GDPR**: Right to erasure, data portability, consent management
@@ -536,15 +610,24 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
 
 ### Current Status
 ✅ **All Core Features Implemented**
+- Three distinct login portals (Candidate, Recruiter, Admin)
+- JWT-based authentication with role-based access control
 - NVIDIA AI integration for intelligent summarization
 - Interactive chatbot assistant powered by Llama 3.1
 - Complete HR dashboard with real-time analytics
 - Job posting management system
 - Advanced resume analysis with multiple AI models
 - GDPR-compliant data handling and privacy protection
-- Modern, responsive web interface
+- Modern, responsive web interface with dark mode
+- Unique themed designs for each portal (Blue, Emerald, Dark)
+- Protected routes with automatic redirects
+- Test accounts for easy exploration
 
 ### Future Roadmap
+- Email verification for new user registration
+- Password reset functionality
+- Two-factor authentication (2FA)
+- OAuth integration (Google, LinkedIn, GitHub)
 - Multi-language resume support
 - Advanced ML model fine-tuning
 - Integration with popular ATS platforms
@@ -553,6 +636,9 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
 - Bulk processing optimization
 - Custom scoring algorithms
 - Integration with job boards and LinkedIn
+- Video interview scheduling
+- Team collaboration features
+- API rate limiting and usage analytics
 
 ## 📞 Support & Contact
 

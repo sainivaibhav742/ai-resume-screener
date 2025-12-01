@@ -53,6 +53,197 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Import authentication dependencies
+from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+from datetime import datetime, timedelta
+from jose import JWTError, jwt
+from fastapi import Depends, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
+# Database imports
+try:
+    from database import SessionLocal, engine
+    from models import User, UserRole
+except ImportError:
+    # Create minimal setup if database module not available
+    SessionLocal = None
+    User = None
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# JWT settings
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+
+# Dependency to get database session
+def get_db():
+    if SessionLocal is None:
+        raise HTTPException(status_code=500, detail="Database not configured")
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash"""
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password: str) -> str:
+    """Hash a password"""
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    """Create JWT access token"""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+# Pydantic models for authentication
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    role: str
+    full_name: Optional[str] = None
+    company_name: Optional[str] = None
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+    user: Dict
+
+# Authentication endpoints
+@app.post("/api/auth/login")
+async def login(request: LoginRequest, db: Session = Depends(get_db)):
+    """Login endpoint"""
+    try:
+        # Find user by email
+        user = db.query(User).filter(User.email == request.email).first()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect email or password"
+            )
+        
+        # Verify password
+        if not verify_password(request.password, user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect email or password"
+            )
+        
+        # Check if user is active
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account is inactive"
+            )
+        
+        # Create access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user.email, "role": user.role.value},
+            expires_delta=access_token_expires
+        )
+        
+        # Return token and user data
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "role": user.role.value,
+                "full_name": getattr(user, "full_name", None),
+                "company_name": getattr(user, "company_name", None)
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Login error: {str(e)}")
+
+@app.post("/api/auth/register")
+async def register(request: RegisterRequest, db: Session = Depends(get_db)):
+    """Register new user endpoint"""
+    try:
+        # Check if user already exists
+        existing_user = db.query(User).filter(User.email == request.email).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+        
+        # Validate role
+        try:
+            user_role = UserRole(request.role)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid role"
+            )
+        
+        # Create new user
+        hashed_password = get_password_hash(request.password)
+        new_user = User(
+            email=request.email,
+            hashed_password=hashed_password,
+            role=user_role,
+            is_active=True,
+            is_verified=False
+        )
+        
+        # Set name based on role
+        if request.role == "candidate" and request.full_name:
+            new_user.full_name = request.full_name
+        elif request.role == "recruiter" and request.company_name:
+            new_user.company_name = request.company_name
+        
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        
+        # Create access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": new_user.email, "role": new_user.role.value},
+            expires_delta=access_token_expires
+        )
+        
+        # Return token and user data
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "id": new_user.id,
+                "email": new_user.email,
+                "role": new_user.role.value,
+                "full_name": getattr(new_user, "full_name", None),
+                "company_name": getattr(new_user, "company_name", None)
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Registration error: {str(e)}")
+
 # Load NLP models
 nlp = spacy.load("en_core_web_sm")
 model = SentenceTransformer('all-MiniLM-L6-v2')

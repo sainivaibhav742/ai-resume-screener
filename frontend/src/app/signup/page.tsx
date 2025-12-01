@@ -4,9 +4,11 @@ import { useState } from "react";
 import { Brain, Mail, Lock, User, Briefcase, ArrowRight, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"candidate" | "recruiter">("candidate");
   const [formData, setFormData] = useState({
@@ -24,35 +26,11 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          role,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Store token
-        localStorage.setItem("token", data.access_token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        
-        // Redirect based on role
-        if (role === "candidate") {
-          router.push("/candidate");
-        } else {
-          router.push("/recruiter");
-        }
-      } else {
-        setError(data.detail || "Registration failed");
-      }
-    } catch (err) {
-      setError("Network error. Please try again.");
+      const name = role === "candidate" ? formData.full_name : formData.company_name;
+      await register(formData.email, formData.password, role, name);
+      // Register function in AuthContext handles redirection
+    } catch (err: any) {
+      setError(err.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }

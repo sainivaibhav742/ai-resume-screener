@@ -136,16 +136,38 @@ export default function Home() {
             
             <div className="flex items-center gap-4">
               <Link 
-                href="/candidate" 
-                className="px-6 py-2.5 rounded-xl font-semibold text-slate-700 dark:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-200 border border-slate-200 dark:border-slate-700"
+                href="/about" 
+                className="px-4 py-2 rounded-lg font-medium text-slate-700 dark:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-200"
               >
-                For Candidates
+                About
               </Link>
               <Link 
-                href="/recruiter" 
+                href="/contact" 
+                className="px-4 py-2 rounded-lg font-medium text-slate-700 dark:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-200"
+              >
+                Contact
+              </Link>
+              <div className="relative group">
+                <button className="px-6 py-2.5 rounded-xl font-semibold text-slate-700 dark:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-200 border border-slate-200 dark:border-slate-700 flex items-center gap-2">
+                  Login
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <Link href="/candidate-login" className="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-t-xl text-sm font-medium text-blue-600 dark:text-blue-400">
+                    🧑 Candidate Login
+                  </Link>
+                  <Link href="/recruiter-login" className="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-b-xl text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                    🏢 Recruiter Login
+                  </Link>
+                </div>
+              </div>
+              <Link 
+                href="/signup" 
                 className="px-6 py-2.5 rounded-xl font-semibold bg-gradient-to-r from-rose-500 to-orange-500 text-white hover:from-rose-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                For Recruiters
+                Sign Up
               </Link>
               <ThemeToggle />
             </div>
