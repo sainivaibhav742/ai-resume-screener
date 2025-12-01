@@ -157,15 +157,38 @@ ai-resume-screener/
 
 ### 📦 Installation & Setup
 
+#### Quick Start (Windows PowerShell) - Recommended ⚡
+
+```powershell
+# Clone the repository
+git clone https://github.com/sainivaibhav742/ai-resume-screener.git
+cd ai-resume-screener
+
+# Run the automated setup script
+.\start.ps1
+
+# Select option 1 for first-time setup
+# Then select option 4 to start both servers
+```
+
+The `start.ps1` script provides an interactive menu:
+- **Option 1**: Full setup (first time) - Installs everything
+- **Option 2**: Start backend only
+- **Option 3**: Start frontend only
+- **Option 4**: Start both servers (opens in separate windows)
+- **Option 5**: Initialize/reset database
+
+#### Manual Setup (All Platforms)
+
 Follow these steps carefully to run the project in a virtual environment:
 
-#### Step 1: Clone the Repository
+**Step 1: Clone the Repository**
 ```bash
 git clone https://github.com/sainivaibhav742/ai-resume-screener.git
 cd ai-resume-screener
 ```
 
-#### Step 2: Backend Setup with Virtual Environment
+**Step 2: Backend Setup with Virtual Environment**
 
 **Windows (PowerShell):**
 ```powershell
@@ -206,7 +229,7 @@ pip install email-validator
 python -m spacy download en_core_web_sm
 ```
 
-#### Step 3: Initialize the Database
+**Step 3: Initialize the Database**
 
 **All Platforms:**
 ```bash
@@ -219,7 +242,7 @@ python init_db.py
 # The database file will be created at: backend/ai_resume_screener.db
 ```
 
-#### Step 4: Start the Backend Server
+**Step 4: Start the Backend Server**
 
 **All Platforms:**
 ```bash
@@ -230,7 +253,7 @@ python main.py
 # API Documentation: http://localhost:8000/docs
 ```
 
-#### Step 5: Frontend Setup (New Terminal)
+**Step 5: Frontend Setup (New Terminal)**
 
 **Windows (PowerShell):**
 ```powershell
