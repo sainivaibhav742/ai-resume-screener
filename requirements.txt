@@ -16,4 +16,5 @@ bcrypt==4.1.1
 pydantic[email]==2.5.0
 alembic==1.13.0
 psycopg2-binary==2.9.9
+psutil==5.9.6
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.0/en_core_web_sm-3.7.0-py3-none-any.whl

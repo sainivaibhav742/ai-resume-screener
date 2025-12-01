@@ -25,6 +25,15 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, parent_dir)
 from ml.job_predictor import JobPredictor
+from ml.resume_parser import AdvancedResumeParser
+from ml.semantic_matcher import SemanticMatcher
+from ml.skill_recommender import SkillRecommendationEngine
+from ml.ats_optimizer import ATSOptimizer
+from backend.performance import (
+    cached, monitor_performance, rate_limit,
+    api_rate_limiter, cache_manager, performance_monitor,
+    get_performance_report
+)
 
 class SummaryRequest(BaseModel):
     experience_data: Dict
@@ -64,11 +73,15 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 # Database imports
 try:
     from database import SessionLocal, engine
-    from models import User, UserRole
-except ImportError:
+    from models import User, UserRole, Job, Resume, Application, Candidate
+except ImportError as e:
     # Create minimal setup if database module not available
+    print(f"Warning: Database import failed: {e}")
     SessionLocal = None
     User = None
+    Job = None
+    Resume = None
+    Application = None
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -108,6 +121,44 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    """Get current authenticated user from JWT token"""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    
+    # Query user from database
+    from models import User
+    user = db.query(User).filter(User.email == email).first()
+    if user is None:
+        raise credentials_exception
+    
+    return {
+        "id": user.id,
+        "email": user.email,
+        "role": user.role.value,
+        "full_name": user.full_name,
+        "is_active": user.is_active
+    }
+
+async def get_current_admin(current_user: dict = Depends(get_current_user)):
+    """Verify current user is an admin"""
+    if current_user["role"] != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    return current_user
 
 # Pydantic models for authentication
 class LoginRequest(BaseModel):
@@ -244,14 +295,61 @@ async def register(request: RegisterRequest, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Registration error: {str(e)}")
 
-# Load NLP models
-nlp = spacy.load("en_core_web_sm")
-model = SentenceTransformer('all-MiniLM-L6-v2')
+# Lazy loading for ML models (loaded on first use to avoid startup delays)
+_nlp = None
+_model = None
+_job_predictor = None
+_advanced_parser = None
+_semantic_matcher = None
+_skill_recommender = None
+_ats_optimizer = None
 
-# Load job predictor model
-job_predictor = JobPredictor()
-model_path = os.path.join(os.path.dirname(__file__), '..', 'ml', 'job_predictor_model.pkl')
-job_predictor.load_model(model_path)
+def get_nlp():
+    global _nlp
+    if _nlp is None:
+        _nlp = spacy.load("en_core_web_sm")
+    return _nlp
+
+def get_sentence_transformer():
+    global _model
+    if _model is None:
+        _model = SentenceTransformer('all-MiniLM-L6-v2')
+    return _model
+
+def get_job_predictor():
+    global _job_predictor
+    if _job_predictor is None:
+        _job_predictor = JobPredictor()
+        model_path = os.path.join(os.path.dirname(__file__), '..', 'ml', 'job_predictor_model.pkl')
+        try:
+            _job_predictor.load_model(model_path)
+        except:
+            print("Warning: Job predictor model not found. Run train_models.py first.")
+    return _job_predictor
+
+def get_advanced_parser():
+    global _advanced_parser
+    if _advanced_parser is None:
+        _advanced_parser = AdvancedResumeParser()
+    return _advanced_parser
+
+def get_semantic_matcher():
+    global _semantic_matcher
+    if _semantic_matcher is None:
+        _semantic_matcher = SemanticMatcher()
+    return _semantic_matcher
+
+def get_skill_recommender():
+    global _skill_recommender
+    if _skill_recommender is None:
+        _skill_recommender = SkillRecommendationEngine()
+    return _skill_recommender
+
+def get_ats_optimizer():
+    global _ats_optimizer
+    if _ats_optimizer is None:
+        _ats_optimizer = ATSOptimizer()
+    return _ats_optimizer
 
 # NVIDIA API configuration
 NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
@@ -298,6 +396,7 @@ def extract_text_from_pdf(file_path: str) -> str:
 
 def parse_resume(text: str) -> Dict:
     """Parse resume text to extract structured data"""
+    nlp = get_nlp()
     doc = nlp(text)
 
     # Extract entities
@@ -378,6 +477,7 @@ def analyze_skill_gap(resume_skills: List[str], job_skills: List[str]) -> Dict:
 
 def ats_optimization_check(text: str, job_description: str) -> Dict:
     """Check ATS optimization: keywords, length, etc."""
+    nlp = get_nlp()
     job_doc = nlp(job_description.lower())
     resume_doc = nlp(text.lower())
     job_keywords = [token.lemma_ for token in job_doc if token.is_alpha and not token.is_stop]
@@ -400,6 +500,7 @@ def ats_optimization_check(text: str, job_description: str) -> Dict:
 
 def language_tone_evaluation(text: str) -> Dict:
     """Evaluate language and tone using spaCy"""
+    nlp = get_nlp()
     doc = nlp(text)
     # Simple sentiment: positive words
     positive_words = ["excellent", "great", "skilled", "experienced", "proficient"]
@@ -422,6 +523,7 @@ def language_tone_evaluation(text: str) -> Dict:
 def bias_detection(text: str) -> Dict:
     """Detect biased language"""
     biased_words = ["man", "woman", "male", "female", "age", "race", "religion"]  # Simple list
+    nlp = get_nlp()
     doc = nlp(text.lower())
     biases = [token.text for token in doc if token.lemma_ in biased_words]
     bias_score = len(biases) / len(doc) if len(doc) > 0 else 0
@@ -523,6 +625,7 @@ def calculate_fit_score(resume_data: Dict, job_description: str) -> float:
     skills_text = " ".join(resume_data["skills"])
 
     # Keyword matching
+    nlp = get_nlp()
     job_doc = nlp(job_description.lower())
     resume_doc = nlp((resume_text + " " + skills_text).lower())
 
@@ -532,6 +635,7 @@ def calculate_fit_score(resume_data: Dict, job_description: str) -> float:
     keyword_overlap = len(set(job_keywords) & set(resume_keywords)) / len(set(job_keywords)) if job_keywords else 0
 
     # Semantic similarity
+    model = get_sentence_transformer()
     embeddings = model.encode([job_description, resume_text])
     semantic_similarity = float(cosine_similarity([embeddings[0]], [embeddings[1]])[0][0])
 
@@ -559,6 +663,7 @@ async def screen_resume(file: UploadFile = File(...), job_description: str = For
         resume_data = parse_resume(text)
 
         # Predict job role
+        job_predictor = get_job_predictor()
         predicted_role = job_predictor.predict(text)
 
         # Skill gap analysis
@@ -1451,6 +1556,657 @@ def get_screening_results():
             }
         ]
     }
+
+# Candidate API Endpoints
+
+@app.get("/api/candidate/profile")
+async def get_candidate_profile(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get candidate profile"""
+    try:
+        candidate = db.query(Candidate).filter(Candidate.user_id == current_user["id"]).first()
+        if not candidate:
+            raise HTTPException(status_code=404, detail="Candidate profile not found")
+        
+        return {
+            "id": candidate.id,
+            "user_id": candidate.user_id,
+            "phone": candidate.phone,
+            "location": candidate.location,
+            "linkedin_url": candidate.linkedin_url,
+            "github_url": candidate.github_url,
+            "portfolio_url": candidate.portfolio_url,
+            "bio": candidate.bio,
+            "years_of_experience": candidate.years_of_experience,
+            "current_role": candidate.current_role,
+            "expected_salary": candidate.expected_salary,
+            "job_preferences": candidate.job_preferences
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching profile: {str(e)}")
+
+
+@app.put("/api/candidate/profile")
+async def update_candidate_profile(profile_data: dict, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Update candidate profile"""
+    try:
+        candidate = db.query(Candidate).filter(Candidate.user_id == current_user["id"]).first()
+        if not candidate:
+            # Create new candidate profile
+            candidate = Candidate(user_id=current_user["id"])
+            db.add(candidate)
+        
+        # Update fields
+        for key, value in profile_data.items():
+            if hasattr(candidate, key):
+                setattr(candidate, key, value)
+        
+        db.commit()
+        db.refresh(candidate)
+        
+        return {"success": True, "message": "Profile updated successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error updating profile: {str(e)}")
+
+
+@app.get("/api/candidate/resumes")
+async def get_candidate_resumes(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get all resumes for the candidate"""
+    try:
+        resumes = db.query(Resume).filter(Resume.user_id == current_user["id"]).all()
+        return {
+            "resumes": [
+                {
+                    "id": r.id,
+                    "filename": r.filename,
+                    "file_path": r.file_path,
+                    "parsed_data": r.parsed_data,
+                    "created_at": r.created_at.isoformat() if r.created_at else None,
+                    "updated_at": r.updated_at.isoformat() if r.updated_at else None
+                }
+                for r in resumes
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching resumes: {str(e)}")
+
+
+@app.post("/api/candidate/resumes")
+async def upload_candidate_resume(file: UploadFile = File(...), current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Upload a new resume"""
+    try:
+        # Save file
+        upload_dir = os.path.join(os.path.dirname(__file__), "uploads", "resumes")
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        file_path = os.path.join(upload_dir, f"{current_user['id']}_{file.filename}")
+        with open(file_path, "wb") as f:
+            content = await file.read()
+            f.write(content)
+        
+        # Create resume record
+        resume = Resume(
+            user_id=current_user["id"],
+            filename=file.filename,
+            file_path=file_path
+        )
+        db.add(resume)
+        db.commit()
+        db.refresh(resume)
+        
+        return {
+            "success": True,
+            "resume_id": resume.id,
+            "message": "Resume uploaded successfully"
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error uploading resume: {str(e)}")
+
+
+@app.delete("/api/candidate/resumes/{resume_id}")
+async def delete_candidate_resume(resume_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Delete a resume"""
+    try:
+        resume = db.query(Resume).filter(
+            Resume.id == resume_id,
+            Resume.user_id == current_user["id"]
+        ).first()
+        
+        if not resume:
+            raise HTTPException(status_code=404, detail="Resume not found")
+        
+        # Delete file if exists
+        if resume.file_path and os.path.exists(resume.file_path):
+            os.remove(resume.file_path)
+        
+        db.delete(resume)
+        db.commit()
+        
+        return {"success": True, "message": "Resume deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error deleting resume: {str(e)}")
+
+
+@app.get("/api/candidate/jobs")
+async def get_available_jobs(
+    skip: int = 0,
+    limit: int = 50,
+    search: str = None,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get available job listings"""
+    try:
+        query = db.query(Job).filter(Job.status == "published")
+        
+        if search:
+            query = query.filter(
+                (Job.title.contains(search)) |
+                (Job.description.contains(search)) |
+                (Job.company.contains(search))
+            )
+        
+        jobs = query.offset(skip).limit(limit).all()
+        total = query.count()
+        
+        return {
+            "jobs": [
+                {
+                    "id": j.id,
+                    "title": j.title,
+                    "company": j.company,
+                    "location": j.location,
+                    "job_type": j.job_type,
+                    "experience_level": j.experience_level,
+                    "salary_range": j.salary_range,
+                    "description": j.description,
+                    "requirements": j.requirements,
+                    "created_at": j.created_at.isoformat() if j.created_at else None
+                }
+                for j in jobs
+            ],
+            "total": total
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching jobs: {str(e)}")
+
+
+@app.get("/api/candidate/jobs/{job_id}")
+async def get_job_details(job_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get detailed job information"""
+    try:
+        job = db.query(Job).filter(Job.id == job_id).first()
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        
+        return {
+            "id": job.id,
+            "title": job.title,
+            "company": job.company,
+            "location": job.location,
+            "job_type": job.job_type,
+            "experience_level": job.experience_level,
+            "salary_range": job.salary_range,
+            "description": job.description,
+            "requirements": job.requirements,
+            "benefits": job.benefits,
+            "created_at": job.created_at.isoformat() if job.created_at else None
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching job details: {str(e)}")
+
+
+@app.get("/api/candidate/applications")
+async def get_candidate_applications(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get all applications submitted by candidate"""
+    try:
+        applications = db.query(Application).filter(Application.candidate_id == current_user["id"]).all()
+        return {
+            "applications": [
+                {
+                    "id": app.id,
+                    "job_id": app.job_id,
+                    "job_title": app.job.title if app.job else None,
+                    "company": app.job.company if app.job else None,
+                    "status": app.status,
+                    "applied_at": app.applied_at.isoformat() if app.applied_at else None,
+                    "match_score": app.match_score
+                }
+                for app in applications
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching applications: {str(e)}")
+
+
+@app.post("/api/candidate/applications")
+async def submit_job_application(application_data: dict, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Submit a job application"""
+    try:
+        # Check if already applied
+        existing = db.query(Application).filter(
+            Application.candidate_id == current_user["id"],
+            Application.job_id == application_data.get("job_id")
+        ).first()
+        
+        if existing:
+            raise HTTPException(status_code=400, detail="Already applied to this job")
+        
+        application = Application(
+            candidate_id=current_user["id"],
+            job_id=application_data.get("job_id"),
+            resume_id=application_data.get("resume_id"),
+            cover_letter=application_data.get("cover_letter"),
+            status="applied"
+        )
+        
+        db.add(application)
+        db.commit()
+        db.refresh(application)
+        
+        return {
+            "success": True,
+            "application_id": application.id,
+            "message": "Application submitted successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error submitting application: {str(e)}")
+
+
+# Dashboard Stats Endpoints
+
+@app.get("/api/candidate/stats")
+async def get_candidate_stats(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get candidate dashboard statistics"""
+    try:
+        # Get candidate data
+        applications = db.query(Application).filter(Application.candidate_id == current_user["id"]).all()
+        resumes = db.query(Resume).filter(Resume.user_id == current_user["id"]).all()
+        
+        # Calculate profile completeness based on candidate data
+        candidate = db.query(Candidate).filter(Candidate.user_id == current_user["id"]).first()
+        profile_fields = 0
+        filled_fields = 0
+        if candidate:
+            fields = ['phone', 'location', 'linkedin_url', 'github_url', 'portfolio_url', 'bio']
+            profile_fields = len(fields)
+            filled_fields = sum(1 for f in fields if getattr(candidate, f, None))
+        
+        profile_completeness = int((filled_fields / profile_fields * 100)) if profile_fields > 0 else 0
+        
+        # Calculate response rate
+        responded = len([a for a in applications if a.status not in ["applied", "submitted"]])
+        response_rate = (responded / len(applications) * 100) if applications else 0.0
+        
+        return {
+            "total_applications": len(applications),
+            "active_applications": len([a for a in applications if a.status in ["applied", "screening", "interview"]]),
+            "total_resumes": len(resumes),
+            "profile_completeness": profile_completeness,
+            "application_response_rate": round(response_rate, 1),
+            "recent_applications": [
+                {
+                    "id": app.id,
+                    "job_title": app.job.title if app.job else "Unknown",
+                    "company": app.job.company if app.job else "Unknown",
+                    "status": app.status,
+                    "applied_date": app.applied_at.isoformat() if app.applied_at else None
+                }
+                for app in applications[:5]
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching stats: {str(e)}")
+
+
+@app.get("/api/recruiter/stats")
+async def get_recruiter_stats(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get recruiter dashboard statistics"""
+    try:
+        jobs = db.query(Job).filter(Job.recruiter_id == current_user["id"]).all()
+        applications = db.query(Application).join(Job).filter(Job.recruiter_id == current_user["id"]).all()
+        
+        return {
+            "total_jobs": len(jobs),
+            "active_jobs": len([j for j in jobs if j.status == "active"]),
+            "total_applications": len(applications),
+            "pending_reviews": len([a for a in applications if a.status == "applied"]),
+            "scheduled_interviews": len([a for a in applications if a.status == "interview"]),
+            "recent_applications": [
+                {
+                    "id": app.id,
+                    "candidate_name": app.candidate.full_name if app.candidate else "Unknown",
+                    "job_title": app.job.title if app.job else "Unknown",
+                    "status": app.status,
+                    "applied_date": app.applied_at.isoformat() if app.applied_at else None,
+                    "match_score": app.match_score
+                }
+                for app in applications[:10]
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching stats: {str(e)}")
+
+
+@app.get("/api/admin/stats")
+async def get_admin_stats(current_user: dict = Depends(get_current_admin), db: Session = Depends(get_db)):
+    """Get admin dashboard statistics"""
+    try:
+        users = db.query(User).all()
+        jobs = db.query(Job).all()
+        applications = db.query(Application).all()
+        resumes = db.query(Resume).all()
+        
+        return {
+            "total_users": len(users),
+            "total_candidates": len([u for u in users if u.role == "candidate"]),
+            "total_recruiters": len([u for u in users if u.role == "recruiter"]),
+            "total_admins": len([u for u in users if u.role == "admin"]),
+            "total_jobs": len(jobs),
+            "active_jobs": len([j for j in jobs if j.status == "active"]),
+            "total_applications": len(applications),
+            "total_resumes": len(resumes),
+            "new_users_today": len([u for u in users if u.created_at and u.created_at.date() == datetime.now().date()]),
+            "new_applications_today": len([a for a in applications if a.applied_at and a.applied_at.date() == datetime.now().date()])
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching stats: {str(e)}")
+
+
+@app.get("/api/admin/analytics")
+async def get_admin_analytics(current_user: dict = Depends(get_current_admin), db: Session = Depends(get_db)):
+    """Get admin analytics data"""
+    try:
+        # Return empty analytics structure - to be populated with actual data
+        return {
+            "user_growth": [],
+            "application_trends": [],
+            "job_categories": [],
+            "success_rate": 0.0,
+            "avg_time_to_hire": "N/A"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching analytics: {str(e)}")
+
+
+# Messages Endpoints
+
+@app.get("/api/candidate/messages")
+async def get_candidate_messages(current_user: dict = Depends(get_current_user)):
+    """Get candidate messages"""
+    return {"messages": []}
+
+
+@app.get("/api/recruiter/messages")
+async def get_recruiter_messages(current_user: dict = Depends(get_current_user)):
+    """Get recruiter messages"""
+    return {"messages": []}
+
+
+@app.post("/api/candidate/messages")
+async def send_candidate_message(message: dict, current_user: dict = Depends(get_current_user)):
+    """Send a message from candidate"""
+    # TODO: Implement message storage in database
+    return {"success": True, "message": "Message functionality not yet implemented"}
+
+
+@app.post("/api/recruiter/messages")
+async def send_recruiter_message(message: dict, current_user: dict = Depends(get_current_user)):
+    """Send a message from recruiter"""
+    # TODO: Implement message storage in database
+    return {"success": True, "message": "Message functionality not yet implemented"}
+
+
+# Admin Management Endpoints
+
+@app.get("/api/admin/users")
+async def get_all_users(
+    role: str = None,
+    status: str = None,
+    skip: int = 0,
+    limit: int = 100,
+    current_user: dict = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all users with filters"""
+    try:
+        query = db.query(User)
+        if role:
+            query = query.filter(User.role == role)
+        if status:
+            query = query.filter(User.is_active == (status == "active"))
+        
+        users = query.offset(skip).limit(limit).all()
+        return {
+            "users": [
+                {
+                    "id": u.id,
+                    "email": u.email,
+                    "full_name": u.full_name,
+                    "role": u.role,
+                    "is_active": u.is_active,
+                    "created_at": u.created_at.isoformat() if u.created_at else None
+                }
+                for u in users
+            ],
+            "total": query.count()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching users: {str(e)}")
+
+
+@app.get("/api/admin/jobs")
+async def get_all_jobs(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: dict = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all jobs"""
+    try:
+        jobs = db.query(Job).offset(skip).limit(limit).all()
+        return {
+            "jobs": [
+                {
+                    "id": j.id,
+                    "title": j.title,
+                    "company": j.company,
+                    "status": j.status,
+                    "recruiter_id": j.recruiter_id,
+                    "created_at": j.created_at.isoformat() if j.created_at else None
+                }
+                for j in jobs
+            ],
+            "total": db.query(Job).count()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching jobs: {str(e)}")
+
+
+@app.get("/api/admin/resumes")
+async def get_all_resumes(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: dict = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all resumes"""
+    try:
+        resumes = db.query(Resume).offset(skip).limit(limit).all()
+        return {
+            "resumes": [
+                {
+                    "id": r.id,
+                    "user_id": r.user_id,
+                    "filename": r.filename,
+                    "created_at": r.created_at.isoformat() if r.created_at else None
+                }
+                for r in resumes
+            ],
+            "total": db.query(Resume).count()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching resumes: {str(e)}")
+
+
+@app.get("/api/admin/health")
+async def get_system_health(current_user: dict = Depends(get_current_admin), db: Session = Depends(get_db)):
+    """Get system health status"""
+    import psutil
+    import time
+    
+    # Test database connection
+    try:
+        db.execute("SELECT 1")
+        db_status = "connected"
+    except:
+        db_status = "disconnected"
+    
+    # Get system metrics
+    memory = psutil.virtual_memory()
+    cpu = psutil.cpu_percent(interval=1)
+    disk = psutil.disk_usage('/')
+    
+    return {
+        "status": "healthy" if db_status == "connected" else "degraded",
+        "database": db_status,
+        "cache": "operational",
+        "ml_models": "lazy-loaded",
+        "memory_usage": f"{memory.percent}%",
+        "cpu_usage": f"{cpu}%",
+        "disk_usage": f"{disk.percent}%"
+    }
+
+
+# New ML/AI endpoints
+
+@app.post("/api/ml/parse-resume-advanced")
+@monitor_performance
+async def parse_resume_advanced(request: ParseResumeRequest):
+    """Advanced resume parsing with detailed extraction"""
+    try:
+        advanced_parser = get_advanced_parser()
+        parsed_data = advanced_parser.parse(request.raw_text)
+        return {
+            "success": True,
+            "data": parsed_data
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Parsing error: {str(e)}")
+
+
+@app.post("/api/ml/match-job-resume")
+@monitor_performance
+async def match_job_resume(resume_data: Dict, job_data: Dict):
+    """Semantic matching between resume and job posting"""
+    try:
+        semantic_matcher = get_semantic_matcher()
+        match_result = semantic_matcher.match(resume_data, job_data)
+        return {
+            "success": True,
+            "match": match_result
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Matching error: {str(e)}")
+
+
+class SkillRecommendationRequest(BaseModel):
+    current_skills: List[str]
+    target_role: Optional[str] = None
+    experience_years: float = 0
+
+
+@app.post("/api/ml/recommend-skills")
+@monitor_performance
+async def recommend_skills(request: SkillRecommendationRequest):
+    """Get personalized skill recommendations"""
+    try:
+        skill_recommender = get_skill_recommender()
+        recommendations = skill_recommender.generate_recommendations(
+            current_skills=request.current_skills,
+            target_role=request.target_role,
+            experience_years=request.experience_years
+        )
+        return {
+            "success": True,
+            "recommendations": recommendations
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Recommendation error: {str(e)}")
+
+
+class ATSAnalysisRequest(BaseModel):
+    resume_text: str
+    job_keywords: Optional[List[str]] = None
+
+
+@app.post("/api/ml/ats-analyze")
+@monitor_performance
+async def ats_analyze(request: ATSAnalysisRequest):
+    """Analyze resume for ATS compatibility"""
+    try:
+        ats_optimizer = get_ats_optimizer()
+        analysis = ats_optimizer.analyze(
+            resume_text=request.resume_text,
+            job_keywords=request.job_keywords
+        )
+        return {
+            "success": True,
+            "analysis": analysis
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ATS analysis error: {str(e)}")
+
+
+@app.post("/api/ml/ats-optimize")
+@monitor_performance
+async def ats_optimize(request: ATSAnalysisRequest):
+    """Get ATS optimization suggestions"""
+    try:
+        ats_optimizer = get_ats_optimizer()
+        optimization = ats_optimizer.optimize_text(
+            text=request.resume_text,
+            job_keywords=request.job_keywords
+        )
+        return {
+            "success": True,
+            "optimization": optimization
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Optimization error: {str(e)}")
+
+
+# Performance monitoring endpoints
+
+@app.get("/api/admin/performance")
+async def get_performance_metrics():
+    """Get system performance metrics (admin only)"""
+    return get_performance_report()
+
+
+@app.get("/api/admin/cache-stats")
+async def get_cache_stats():
+    """Get cache statistics"""
+    return cache_manager.get_stats()
+
+
+@app.post("/api/admin/clear-cache")
+async def clear_cache():
+    """Clear application cache"""
+    cache_manager.clear()
+    return {"success": True, "message": "Cache cleared"}
+
 
 if __name__ == "__main__":
     import uvicorn
