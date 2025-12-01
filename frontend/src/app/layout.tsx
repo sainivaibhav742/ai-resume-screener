@@ -4,6 +4,7 @@ import "./globals.css";
 import ChatAssistant from "../components/ChatAssistant";
 import Footer from "../components/Footer";
 import ScrollToTop from "../components/ScrollToTop";
+import { AuthProvider } from "../contexts/AuthContext";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -50,10 +51,11 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${playfair.variable} ${robotoSlab.variable} ${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        {children}
-        <ChatAssistant />
-        <Footer />
-        <ScrollToTop />
+        <AuthProvider>
+          {children}
+          <ChatAssistant />
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
