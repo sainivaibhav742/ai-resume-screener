@@ -121,12 +121,12 @@ export default function AdminDashboard() {
 
   return (
     <ProtectedRoute requireRole="admin">
-      <div className="flex min-h-screen bg-gradient-to-br from-slate-100 via-rose-50 to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-rose-950">
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-rose-50 to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-rose-950">
         {/* Sidebar */}
         <Sidebar navItems={adminNavItems} themeColor="rose" portalName="Admin Portal" />
 
         {/* Main Content */}
-        <div className="flex-1 overflow-x-hidden">
+        <div className="ml-64">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">

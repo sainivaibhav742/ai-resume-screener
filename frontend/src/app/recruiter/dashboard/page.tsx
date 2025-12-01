@@ -120,12 +120,12 @@ export default function RecruiterDashboard() {
 
   return (
     <ProtectedRoute requireRole="recruiter">
-      <div className="flex min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-slate-950 dark:via-emerald-950 dark:to-teal-950">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-slate-950 dark:via-emerald-950 dark:to-teal-950">
         {/* Sidebar */}
         <Sidebar navItems={recruiterNavItems} themeColor="emerald" portalName="Recruiter Portal" />
 
         {/* Main Content */}
-        <div className="flex-1 overflow-x-hidden">
+        <div className="ml-64">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Welcome Header */}
             <div className="flex items-center justify-between mb-8">

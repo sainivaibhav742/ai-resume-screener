@@ -48,7 +48,7 @@ export default function Sidebar({ navItems, themeColor, portalName }: SidebarPro
   const colors = themeColors[themeColor];
 
   return (
-    <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 flex flex-col h-screen sticky top-0">
+    <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 flex flex-col fixed left-0 top-0 h-screen z-40">
       {/* Logo Section */}
       <div className="p-6 border-b border-slate-200 dark:border-slate-700">
         <Link href="/" className="flex items-center gap-3">
@@ -81,7 +81,7 @@ export default function Sidebar({ navItems, themeColor, portalName }: SidebarPro
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-hide">
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (

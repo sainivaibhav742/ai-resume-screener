@@ -86,6 +86,16 @@ body {
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
 }
 
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
 /* Animations */
 @keyframes fadeInUp {
   from {

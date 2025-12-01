@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
+"use client";
+
 import { Inter, Playfair_Display, Roboto_Slab, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ChatAssistant from "../components/ChatAssistant";
 import Footer from "../components/Footer";
 import ScrollToTop from "../components/ScrollToTop";
 import { AuthProvider } from "../contexts/AuthContext";
+import { usePathname } from "next/navigation";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -36,16 +38,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "AI Resume Screener",
-  description: "NLP-powered resume screening and job matching platform with AI assistant",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  
+  // Hide footer on dashboard and all portal pages
+  const isDashboard = pathname?.includes('/dashboard') || 
+                      pathname?.startsWith('/candidate/') || 
+                      pathname?.startsWith('/recruiter/') || 
+                      pathname?.startsWith('/admin/');
+  
   return (
     <html lang="en">
       <body
@@ -54,7 +59,7 @@ export default function RootLayout({
         <AuthProvider>
           {children}
           <ChatAssistant />
-          <Footer />
+          {!isDashboard && <Footer />}
         </AuthProvider>
       </body>
     </html>
