@@ -167,17 +167,16 @@ cd ai-resume-screener
 
 #### Step 2: Backend Setup with Virtual Environment
 
-```bash
+**Windows (PowerShell):**
+```powershell
 # Create a virtual environment in the project root
 python -m venv venv
 
+# If you get execution policy error, run this first:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
 # Activate the virtual environment
-# On Windows (PowerShell):
 .\venv\Scripts\Activate.ps1
-# On Windows (CMD):
-venv\Scripts\activate.bat
-# On macOS/Linux:
-source venv/bin/activate
 
 # Install all Python dependencies
 pip install -r requirements.txt
@@ -189,8 +188,27 @@ pip install email-validator
 python -m spacy download en_core_web_sm
 ```
 
+**Windows (CMD):**
+```cmd
+python -m venv venv
+venv\Scripts\activate.bat
+pip install -r requirements.txt
+pip install email-validator
+python -m spacy download en_core_web_sm
+```
+
+**macOS/Linux:**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+pip install email-validator
+python -m spacy download en_core_web_sm
+```
+
 #### Step 3: Initialize the Database
 
+**All Platforms:**
 ```bash
 # Navigate to backend directory (keep venv activated)
 cd backend
@@ -203,6 +221,7 @@ python init_db.py
 
 #### Step 4: Start the Backend Server
 
+**All Platforms:**
 ```bash
 # Make sure you're in the backend directory with venv activated
 python main.py
@@ -213,10 +232,11 @@ python main.py
 
 #### Step 5: Frontend Setup (New Terminal)
 
-```bash
+**Windows (PowerShell):**
+```powershell
 # Open a NEW terminal window
 # Navigate to frontend directory
-cd ai-resume-screener/frontend
+cd ai-resume-screener\frontend
 
 # Install Node.js dependencies
 npm install
@@ -225,6 +245,14 @@ npm install
 npm run dev
 
 # Frontend will start on: http://localhost:3000
+```
+
+**macOS/Linux:**
+```bash
+# Open a NEW terminal window
+cd ai-resume-screener/frontend
+npm install
+npm run dev
 ```
 
 ### ✅ Running the Application
