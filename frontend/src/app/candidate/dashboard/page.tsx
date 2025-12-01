@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Sidebar from "@/components/Sidebar";
 import {
   FileText,
   Briefcase,
@@ -16,8 +17,22 @@ import {
   ArrowRight,
   Download,
   Star,
+  LayoutDashboard,
+  User,
+  Settings,
+  MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
+
+const candidateNavItems = [
+  { name: "Dashboard", href: "/candidate/dashboard", icon: LayoutDashboard },
+  { name: "My Resumes", href: "/candidate/resumes", icon: FileText },
+  { name: "Browse Jobs", href: "/candidate/jobs", icon: Briefcase },
+  { name: "Applications", href: "/candidate/applications", icon: Target },
+  { name: "Profile", href: "/candidate/profile", icon: User },
+  { name: "Messages", href: "/candidate/messages", icon: MessageSquare },
+  { name: "Settings", href: "/candidate/settings", icon: Settings },
+];
 
 interface DashboardStats {
   totalResumes: number;
@@ -90,9 +105,9 @@ export default function CandidateDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#fef8f5] via-[#fff5f1] to-[#ffe8df] dark:from-[#1a1212] dark:via-[#2d2424] dark:to-[#1a1212] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-600 dark:text-slate-400">Loading dashboard...</p>
         </div>
       </div>
@@ -101,21 +116,26 @@ export default function CandidateDashboard() {
 
   return (
     <ProtectedRoute requireRole="candidate">
-      <div className="min-h-screen bg-gradient-to-br from-[#fef8f5] via-[#fff5f1] to-[#ffe8df] dark:from-[#1a1212] dark:via-[#2d2424] dark:to-[#1a1212">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Welcome Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-              Welcome back, {user?.full_name || "Candidate"}! 👋
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400">
-              Here's what's happening with your job search today.
-            </p>
-          </div>
+      <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950">
+        {/* Sidebar */}
+        <Sidebar navItems={candidateNavItems} themeColor="blue" portalName="Candidate Portal" />
+
+        {/* Main Content */}
+        <div className="flex-1 overflow-x-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Welcome Header */}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                Welcome back, {user?.email?.split("@")[0] || "Candidate"}! 👋
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400">
+                Here's what's happening with your job search today.
+              </p>
+            </div>
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-blue-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-gradient-to-br from-rose-400 to-orange-400 rounded-lg">
                   <FileText className="w-6 h-6 text-white" />
@@ -130,9 +150,9 @@ export default function CandidateDashboard() {
               <p className="text-slate-600 dark:text-slate-400 text-sm">Total Resumes</p>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-blue-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-amber-400 to-orange-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg">
                   <Briefcase className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-sm text-green-600 dark:text-green-400 font-medium">
@@ -145,9 +165,9 @@ export default function CandidateDashboard() {
               <p className="text-slate-600 dark:text-slate-400 text-sm">Active Applications</p>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-blue-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-green-400 to-emerald-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
                   <TrendingUp className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-sm text-green-600 dark:text-green-400 font-medium">
@@ -160,9 +180,9 @@ export default function CandidateDashboard() {
               <p className="text-slate-600 dark:text-slate-400 text-sm">Avg Match Score</p>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-blue-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg">
                   <Eye className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-sm text-green-600 dark:text-green-400 font-medium">
@@ -175,9 +195,9 @@ export default function CandidateDashboard() {
               <p className="text-slate-600 dark:text-slate-400 text-sm">Profile Views</p>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-blue-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg">
                   <Star className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-sm text-slate-400">Updated 1h ago</span>
@@ -188,9 +208,9 @@ export default function CandidateDashboard() {
               <p className="text-slate-600 dark:text-slate-400 text-sm">Saved Jobs</p>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-blue-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-orange-400 to-red-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg">
                   <Calendar className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-sm text-rose-600 dark:text-rose-400 font-medium">
@@ -214,7 +234,7 @@ export default function CandidateDashboard() {
                   </h2>
                   <Link
                     href="/candidate/jobs"
-                    className="text-sm text-rose-600 hover:text-rose-700 dark:text-rose-400 font-medium"
+                    className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium"
                   >
                     View All
                   </Link>
@@ -226,7 +246,7 @@ export default function CandidateDashboard() {
                       key={activity.id}
                       className="flex items-start gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-750 transition-colors"
                     >
-                      <div className="p-2 bg-gradient-to-br from-rose-400 to-orange-400 rounded-lg flex-shrink-0">
+                      <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex-shrink-0">
                         {activity.icon === "briefcase" && <Briefcase className="w-5 h-5 text-white" />}
                         {activity.icon === "target" && <Target className="w-5 h-5 text-white" />}
                         {activity.icon === "calendar" && <Calendar className="w-5 h-5 text-white" />}
@@ -261,47 +281,47 @@ export default function CandidateDashboard() {
                 <div className="space-y-3">
                   <Link
                     href="/candidate/resumes"
-                    className="flex items-center justify-between p-4 bg-gradient-to-r from-rose-50 to-orange-50 dark:from-rose-900/20 dark:to-orange-900/20 rounded-lg border border-rose-200 dark:border-rose-800 hover:shadow-md transition-shadow group"
+                    className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800 hover:shadow-md transition-shadow group"
                   >
                     <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-rose-600" />
+                      <FileText className="w-5 h-5 text-blue-600" />
                       <span className="font-medium text-slate-900 dark:text-white">
                         Upload Resume
                       </span>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-rose-600 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-5 h-5 text-blue-600 group-hover:translate-x-1 transition-transform" />
                   </Link>
 
                   <Link
                     href="/candidate/jobs"
-                    className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-800 hover:shadow-md transition-shadow group"
+                    className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-200 dark:border-purple-800 hover:shadow-md transition-shadow group"
                   >
                     <div className="flex items-center gap-3">
-                      <Briefcase className="w-5 h-5 text-amber-600" />
+                      <Briefcase className="w-5 h-5 text-purple-600" />
                       <span className="font-medium text-slate-900 dark:text-white">
                         Browse Jobs
                       </span>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-amber-600 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-5 h-5 text-purple-600 group-hover:translate-x-1 transition-transform" />
                   </Link>
 
                   <Link
                     href="/candidate/profile"
-                    className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-800 hover:shadow-md transition-shadow group"
+                    className="flex items-center justify-between p-4 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800 hover:shadow-md transition-shadow group"
                   >
                     <div className="flex items-center gap-3">
-                      <Award className="w-5 h-5 text-green-600" />
+                      <Award className="w-5 h-5 text-cyan-600" />
                       <span className="font-medium text-slate-900 dark:text-white">
                         Update Profile
                       </span>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-green-600 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-5 h-5 text-cyan-600 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </div>
               </div>
 
               {/* Profile Completion */}
-              <div className="bg-gradient-to-br from-rose-400 via-orange-400 to-amber-400 rounded-xl shadow-lg p-6 text-white">
+              <div className="bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 rounded-xl shadow-lg p-6 text-white">
                 <h3 className="text-lg font-bold mb-3">Profile Strength</h3>
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-2">
@@ -317,13 +337,14 @@ export default function CandidateDashboard() {
                 </p>
                 <Link
                   href="/candidate/profile"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-white text-rose-600 font-medium rounded-lg hover:shadow-lg transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-white text-blue-600 font-medium rounded-lg hover:shadow-lg transition-all"
                 >
                   Complete Profile
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>

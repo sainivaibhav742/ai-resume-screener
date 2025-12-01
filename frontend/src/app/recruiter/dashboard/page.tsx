@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Sidebar from "@/components/Sidebar";
 import {
   Briefcase,
   Users,
@@ -16,8 +17,23 @@ import {
   Plus,
   CheckCircle,
   Star,
+  LayoutDashboard,
+  Search,
+  Settings,
+  MessageSquare,
+  BarChart3,
 } from "lucide-react";
 import Link from "next/link";
+
+const recruiterNavItems = [
+  { name: "Dashboard", href: "/recruiter/dashboard", icon: LayoutDashboard },
+  { name: "Job Postings", href: "/recruiter/jobs", icon: Briefcase },
+  { name: "Candidates", href: "/recruiter/candidates", icon: Users },
+  { name: "Screen Resumes", href: "/recruiter/screening", icon: Search },
+  { name: "Analytics", href: "/recruiter/analytics", icon: BarChart3 },
+  { name: "Messages", href: "/recruiter/messages", icon: MessageSquare },
+  { name: "Settings", href: "/recruiter/settings", icon: Settings },
+];
 
 interface DashboardStats {
   totalJobs: number;
@@ -93,9 +109,9 @@ export default function RecruiterDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#fef8f5] via-[#fff5f1] to-[#ffe8df] dark:from-[#1a1212] dark:via-[#2d2424] dark:to-[#1a1212] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-slate-950 dark:via-emerald-950 dark:to-teal-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-600 dark:text-slate-400">Loading dashboard...</p>
         </div>
       </div>
@@ -104,32 +120,37 @@ export default function RecruiterDashboard() {
 
   return (
     <ProtectedRoute requireRole="recruiter">
-      <div className="min-h-screen bg-gradient-to-br from-[#fef8f5] via-[#fff5f1] to-[#ffe8df] dark:from-[#1a1212] dark:via-[#2d2424] dark:to-[#1a1212">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Welcome Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                Welcome back, {user?.company_name || "Recruiter"}! 👋
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400">
-                Here's your recruitment overview for today.
-              </p>
+      <div className="flex min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-slate-950 dark:via-emerald-950 dark:to-teal-950">
+        {/* Sidebar */}
+        <Sidebar navItems={recruiterNavItems} themeColor="emerald" portalName="Recruiter Portal" />
+
+        {/* Main Content */}
+        <div className="flex-1 overflow-x-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Welcome Header */}
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                  Welcome back, {user?.email?.split("@")[0] || "Recruiter"}! 👋
+                </h1>
+                <p className="text-slate-600 dark:text-slate-400">
+                  Here's your recruitment overview for today.
+                </p>
+              </div>
+              <Link
+                href="/recruiter/jobs"
+                className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Post New Job
+              </Link>
             </div>
-            <Link
-              href="/recruiter/jobs"
-              className="px-6 py-3 bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              Post New Job
-            </Link>
-          </div>
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-emerald-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-rose-400 to-orange-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg">
                   <Briefcase className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-sm text-green-600 dark:text-green-400 font-medium">
@@ -142,9 +163,9 @@ export default function RecruiterDashboard() {
               <p className="text-slate-600 dark:text-slate-400 text-sm">Total Jobs Posted</p>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-emerald-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-green-400 to-emerald-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg">
                   <CheckCircle className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-sm text-slate-400">Active</span>
@@ -155,9 +176,9 @@ export default function RecruiterDashboard() {
               <p className="text-slate-600 dark:text-slate-400 text-sm">Active Job Postings</p>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-emerald-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg">
                   <Users className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-sm text-green-600 dark:text-green-400 font-medium">
@@ -170,9 +191,9 @@ export default function RecruiterDashboard() {
               <p className="text-slate-600 dark:text-slate-400 text-sm">Total Candidates</p>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-emerald-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-amber-400 to-orange-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg">
                   <Star className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-sm text-slate-400">Top picks</span>
@@ -183,9 +204,9 @@ export default function RecruiterDashboard() {
               <p className="text-slate-600 dark:text-slate-400 text-sm">Shortlisted</p>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-emerald-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
                   <TrendingUp className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-sm text-green-600 dark:text-green-400 font-medium">
@@ -395,6 +416,7 @@ export default function RecruiterDashboard() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>

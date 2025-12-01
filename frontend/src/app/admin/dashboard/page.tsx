@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Sidebar from "@/components/Sidebar";
 import {
   Users,
   Briefcase,
@@ -21,8 +22,23 @@ import {
   Filter,
   Download,
   RefreshCw,
+  LayoutDashboard,
+  BarChart3,
+  Bell,
+  Lock,
 } from "lucide-react";
 import Link from "next/link";
+
+const adminNavItems = [
+  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
+  { name: "Resumes", href: "/admin/resumes", icon: FileText },
+  { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { name: "System Health", href: "/admin/system", icon: Activity },
+  { name: "Security", href: "/admin/security", icon: Lock },
+  { name: "Settings", href: "/admin/settings", icon: Settings },
+];
 
 interface AdminStats {
   totalUsers: number;
@@ -94,7 +110,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#fef8f5] via-[#fff5f1] to-[#ffe8df] dark:from-[#1a1212] dark:via-[#2d2424] dark:to-[#1a1212] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-rose-50 to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-rose-950 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-600 dark:text-slate-400">Loading admin dashboard...</p>
@@ -105,33 +121,31 @@ export default function AdminDashboard() {
 
   return (
     <ProtectedRoute requireRole="admin">
-      <div className="min-h-screen bg-gradient-to-br from-[#fef8f5] via-[#fff5f1] to-[#ffe8df] dark:from-[#1a1212] dark:via-[#2d2424] dark:to-[#1a1212]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-gradient-to-br from-rose-500 to-orange-500 rounded-lg">
-                  <Shield className="w-6 h-6 text-white" />
+      <div className="flex min-h-screen bg-gradient-to-br from-slate-100 via-rose-50 to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-rose-950">
+        {/* Sidebar */}
+        <Sidebar navItems={adminNavItems} themeColor="rose" portalName="Admin Portal" />
+
+        {/* Main Content */}
+        <div className="flex-1 overflow-x-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-gradient-to-br from-rose-500 to-orange-500 rounded-lg">
+                    <Shield className="w-6 h-6 text-white" />
+                  </div>
+                  <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+                    Admin Dashboard
+                  </h1>
                 </div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-                  Admin Dashboard
-                </h1>
+                <p className="text-slate-600 dark:text-slate-400">
+                  System overview and management • Logged in as {user?.email}
+                </p>
               </div>
-              <p className="text-slate-600 dark:text-slate-400">
-                System overview and management • Logged in as {user?.email}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/admin-login"
-                className="px-4 py-2 bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 rounded-lg hover:bg-rose-200 dark:hover:bg-rose-900/50 transition-all text-sm font-medium flex items-center gap-2"
-              >
-                <Shield className="w-4 h-4" />
-                Admin Login
-              </Link>
-              <Link
-                href="/candidate/dashboard"
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/candidate/dashboard"
                 className="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all text-sm font-medium"
               >
                 👤 Candidate View
@@ -150,9 +164,9 @@ export default function AdminDashboard() {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg">
                   <Users className="w-6 h-6 text-white" />
                 </div>
                 <TrendingUp className="w-5 h-5 text-green-500" />
@@ -167,9 +181,9 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg">
                   <Briefcase className="w-6 h-6 text-white" />
                 </div>
                 <TrendingUp className="w-5 h-5 text-green-500" />
@@ -184,9 +198,9 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-amber-400 to-orange-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg">
                   <FileText className="w-6 h-6 text-white" />
                 </div>
                 <TrendingUp className="w-5 h-5 text-green-500" />
@@ -201,9 +215,9 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-rose-400 to-pink-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-rose-500 to-pink-500 rounded-lg">
                   <Activity className="w-6 h-6 text-white" />
                 </div>
                 <Eye className="w-5 h-5 text-slate-400" />
@@ -218,9 +232,9 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg">
                   <Users className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -230,9 +244,9 @@ export default function AdminDashboard() {
               <p className="text-slate-600 dark:text-slate-400 text-sm">Total Candidates</p>
             </div>
 
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 border border-rose-100 dark:border-slate-700 hover:shadow-xl transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg">
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
                   <Briefcase className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -426,6 +440,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>
